@@ -1,825 +1,1440 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full bg-slate-950 text-slate-100">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Finanzas Numéricas — Ejercicio Integrador de Métodos Numéricos</title>
-<script>
-  window.MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] } };
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js" defer></script>
-<style>
-:root{
-  --navy:#0f2545;
-  --blue:#1e5fae;
-  --blue-light:#eaf1fb;
-  --white:#ffffff;
-  --bg:#f4f6f9;
-  --green:#1c8a4b;
-  --green-bg:#e7f6ee;
-  --red:#c0392b;
-  --red-bg:#fbeceb;
-  --yellow:#a9740a;
-  --yellow-bg:#fdf3e0;
-  --gray:#5b6675;
-  --border:#dfe4ec;
-}
-*{box-sizing:border-box;}
-body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:#1c2733;line-height:1.55;}
-h1,h2,h3,h4{color:var(--navy);margin-top:0;}
-a{color:var(--blue);}
-.container{max-width:1100px;margin:0 auto;padding:0 20px;}
-section{padding:60px 0;scroll-margin-top:80px;}
-section:nth-of-type(even){background:var(--white);}
-
-/* NAV */
-nav{position:sticky;top:0;background:var(--navy);z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.15);}
-.navbar{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:12px 20px;}
-.brand{color:#fff;font-weight:700;font-size:1.1rem;}
-.brand span{color:#9dc3ff;font-weight:400;font-size:.8rem;display:block;}
-.nav-links{display:flex;gap:4px;flex-wrap:wrap;}
-.nav-links a{color:#d7e4f7;text-decoration:none;font-size:.85rem;padding:8px 10px;border-radius:6px;transition:.15s;}
-.nav-links a:hover{background:rgba(255,255,255,.12);color:#fff;}
-.hamburger{display:none;background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;}
-@media(max-width:900px){
-  .nav-links{display:none;flex-direction:column;position:absolute;top:56px;left:0;right:0;background:var(--navy);padding:10px;}
-  .nav-links.open{display:flex;}
-  .hamburger{display:block;}
-}
-
-/* CARDS */
-.card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:24px;box-shadow:0 2px 10px rgba(15,37,69,.05);margin-bottom:20px;}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
-@media(max-width:800px){.grid3{grid-template-columns:1fr;}}
-.badge{display:inline-block;background:var(--blue-light);color:var(--blue);font-weight:700;padding:4px 10px;border-radius:6px;font-size:.8rem;margin-bottom:8px;}
-.btn{background:var(--blue);color:#fff;border:none;padding:11px 20px;border-radius:8px;font-size:.95rem;cursor:pointer;font-weight:600;transition:.15s;}
-.btn:hover{background:var(--navy);}
-.btn-outline{background:transparent;color:var(--blue);border:1.5px solid var(--blue);}
-.btn-outline:hover{background:var(--blue-light);}
-.btn-secondary{background:var(--gray);}
-.btn-secondary:hover{background:#3f4854;}
-.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;}
-label{font-weight:600;font-size:.85rem;color:var(--navy);display:block;margin-bottom:4px;}
-input[type=number],input[type=text],select{
-  width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:7px;font-size:.95rem;background:#fbfcfe;
-}
-input:focus,select:focus{outline:2px solid var(--blue);outline-offset:1px;}
-.field{margin-bottom:14px;}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-@media(max-width:700px){.two-col{grid-template-columns:1fr;}}
-
-table{border-collapse:collapse;width:100%;font-size:.9rem;}
-th,td{border:1px solid var(--border);padding:7px 9px;text-align:center;}
-th{background:var(--blue-light);color:var(--navy);}
-.table-wrap{overflow-x:auto;}
-
-.matrix-table input{width:75px;text-align:center;padding:6px;}
-.matrix-table td{border:none;padding:4px;}
-.matrix-table{width:auto;margin:auto;}
-
-.result-box{border-radius:9px;padding:14px 16px;margin-top:10px;font-weight:600;}
-.result-ok{background:var(--green-bg);color:var(--green);border:1px solid #bfe6cf;}
-.result-bad{background:var(--red-bg);color:var(--red);border:1px solid #f0c6c2;}
-.result-warn{background:var(--yellow-bg);color:var(--yellow);border:1px solid #f2ddad;}
-.result-neutral{background:var(--blue-light);color:var(--navy);border:1px solid #cfe0f5;}
-
-.results-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px;}
-@media(max-width:700px){.results-grid{grid-template-columns:1fr;}}
-.result-tile{background:var(--blue-light);border-radius:9px;padding:14px;text-align:center;}
-.result-tile .val{font-size:1.3rem;font-weight:700;color:var(--navy);}
-.result-tile .lab{font-size:.78rem;color:var(--gray);}
-
-.interp{background:#f8fafc;border-left:4px solid var(--blue);padding:10px 14px;border-radius:6px;font-size:.9rem;margin-top:10px;}
-
-.progress{display:flex;gap:8px;margin:14px 0;}
-.progress span{background:var(--blue-light);color:var(--navy);padding:5px 12px;border-radius:20px;font-size:.78rem;font-weight:600;}
-.progress span.active{background:var(--blue);color:#fff;}
-
-.time-card{display:flex;gap:16px;flex-wrap:wrap;}
-.time-item{flex:1;min-width:140px;background:var(--blue-light);border-radius:9px;padding:14px;text-align:center;}
-.time-item b{display:block;font-size:1.4rem;color:var(--navy);}
-
-.hero{text-align:center;padding:70px 0 40px;}
-.hero h1{font-size:2.4rem;}
-.hero p{color:var(--gray);max-width:640px;margin:14px auto;}
-
-canvas{max-width:100%;}
-.formula-box{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin:10px 0;font-size:.95rem;overflow-x:auto;}
-
-footer{background:var(--navy);color:#cfe0f5;padding:30px 0;text-align:center;font-size:.85rem;}
-
-@media print{
-  nav,.btn-row,.no-print{display:none !important;}
-  section{padding:12px 0;break-inside:avoid;}
-  .card{box-shadow:none;border:1px solid #999;}
-}
-.small-note{font-size:.8rem;color:var(--gray);}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Desafío de Integración Numérica - La Paz</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              900: '#14532d',
+            },
+            accent: {
+              300: '#93c5fd',
+              500: '#3b82f6',
+              600: '#2563eb',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    /* Pulsing glow */
+    .glow-accent { box-shadow: 0 0 20px -5px rgba(59, 130, 246, 0.3); }
+    .glow-brand { box-shadow: 0 0 20px -5px rgba(34, 197, 94, 0.3); }
+  </style>
 </head>
-<body>
+<body class="h-full font-sans antialiased bg-slate-950 text-slate-100 flex flex-col overflow-hidden">
 
-<nav>
-  <div class="navbar">
-    <div class="brand">Finanzas Numéricas<span>Ejercicio Integrador — Métodos Numéricos</span></div>
-    <button class="hamburger" id="hamburgerBtn">☰</button>
-    <div class="nav-links" id="navLinks">
-      <a href="#inicio">Inicio</a>
-      <a href="#contexto">Contexto</a>
-      <a href="#ejercicio1">Errores</a>
-      <a href="#ejercicio2">Taylor</a>
-      <a href="#ejercicio3">Sistemas</a>
-      <a href="#comparacion">Comparación</a>
-      <a href="#conclusiones">Conclusiones</a>
-      <a href="#info">Información</a>
-    </div>
-  </div>
-</nav>
-
-<!-- INICIO -->
-<section id="inicio">
-  <div class="container">
-    <div class="hero">
-      <div class="badge">Trabajo Integrador — Metodos Numericos I</div>
-      <h1>Finanzas Numéricas</h1>
-      <p><strong>Ejercicio Integrador de Métodos Numéricos</strong><br>
-      Aplicación interactiva para el análisis de errores, aproximación mediante Taylor y solución de sistemas de ecuaciones lineales aplicados al contexto financiero, dando tambien un informe de resultados.<br>
-    <strong>Integrantes : 
-      <br>Pabel Dante Churata Apaza</br>
-      <br>Gabriel Efrain Cruz Quino</br>
-      <br>Melanny Vania Ramos Paco</br>
-      <br>Adriana Valeria Fernandez Flores</br>
-    </strong></p>
-      <div class="btn-row" style="justify-content:center;">
-        <button class="btn" onclick="location.href='#contexto'">Comenzar ejercicio</button>
-        <button class="btn btn-outline" onclick="window.print()">🖨 Imprimir resultados</button>
+  <!-- TOP HEADER NAVBAR -->
+  <header class="bg-slate-900/90 border-b border-slate-800 backdrop-blur-md px-4 py-3 flex items-center justify-between z-30 shrink-0">
+    <div class="flex items-center space-x-3">
+      <div class="bg-gradient-to-tr from-brand-600 to-accent-500 p-2 rounded-xl shadow-lg">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="font-bold text-lg text-white leading-tight flex items-center gap-2">
+          Desafío de Integración Numérica
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-400 border border-brand-500/30">La Paz 2026</span>
+        </h1>
+        <p class="text-xs text-slate-400">Plataforma Académica de Análisis Numérico - UMSA / FI</p>
       </div>
     </div>
-  </div>
-</section>
 
-<!-- CONTEXTO -->
-<section id="contexto">
-  <div class="container">
-    <h2>Contexto financiero</h2>
-    <div class="card">
-      <p>Una empresa evalúa financieramente <strong>tres alternativas de inversión</strong> (Proyecto A, B y C). Los flujos de efectivo estimados, las tasas de retorno y los costos de oportunidad de cada proyecto están relacionados entre sí, de modo que el monto óptimo a asignar a cada uno debe obtenerse resolviendo un <strong>sistema de ecuaciones lineales</strong>.</p>
-      <p>Durante el análisis, los valores registrados (tasas, flujos, factores de descuento) provienen de estimaciones y mediciones contables, por lo que pueden contener <strong>errores de redondeo o truncamiento</strong>. Además, algunas funciones financieras (como el valor presente con interés continuo o el crecimiento logarítmico de un fondo) no pueden evaluarse siempre de forma directa y conviene <strong>aproximarlas mediante la Serie de Taylor</strong>.</p>
-      <p>Así, el mismo caso conecta naturalmente los tres temas del curso.</p>
-      <div class="result-box result-neutral">¿Qué aprenderás?<br>
-        ✓ Identificar errores numéricos &nbsp; ✓ Aproximar funciones mediante Taylor &nbsp; ✓ Resolver sistemas lineales<br>
-        ✓ Comparar métodos numéricos &nbsp; ✓ Analizar convergencia &nbsp; ✓ Interpretar resultados financieros
-      </div>
+    <!-- Actions -->
+    <div class="flex items-center space-x-2">
+      <button onclick="toggleTheoryModal()" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5 transition">
+        <svg class="w-4 h-4 text-accent-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+        </svg>
+        Fórmulas y Teoría
+      </button>
+      <button onclick="resetCurrentExercise()" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 flex items-center gap-1.5 transition">
+        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        Restablecer Ejercicio
+      </button>
     </div>
-  </div>
-</section>
+  </header>
 
-<!-- EJERCICIO 1 -->
-<section id="ejercicio1">
-  <div class="container">
-    <div class="progress"><span class="active">Paso 1 de 3</span><span>Paso 2 de 3</span><span>Paso 3 de 3</span></div>
-    <h2>Ejercicio 1 — Análisis de errores</h2>
-    <div class="card">
-      <p><strong>Objetivo:</strong> determinar qué tan cercana es una aproximación financiera respecto a su valor verdadero.</p>
-      <p class="small-note">En aplicaciones financieras, los valores pueden estar sujetos a redondeo, truncamiento o mediciones aproximadas. Por ejemplo, el valor contable registrado de un flujo de caja frente a su valor real auditado.</p>
-      <div class="formula-box">
-        \(E_a = |V_r - V_a|\) &nbsp;&nbsp; \(E_r = \dfrac{|V_r-V_a|}{|V_r|}\) &nbsp;&nbsp; \(E_p = E_r \times 100\)
-      </div>
-      <div class="two-col">
-        <div class="field"><label>Valor verdadero (Vr)</label><input type="number" id="err-vr" value="1250" step="any"></div>
-        <div class="field"><label>Valor aproximado (Va)</label><input type="number" id="err-va" value="1248.50" step="any"></div>
-      </div>
-      <div class="btn-row">
-        <button class="btn" onclick="calcularError()">Calcular error</button>
-        <button class="btn btn-secondary" onclick="limpiarError()">Limpiar</button>
-      </div>
-      <div id="err-resultados"></div>
-    </div>
-  </div>
-</section>
+  <!-- MAIN APP CONTAINER (SIDEBAR + WORKSPACE) -->
+  <div class="flex-1 flex overflow-hidden">
 
-<!-- EJERCICIO 2 -->
-<section id="ejercicio2">
-  <div class="container">
-    <div class="progress"><span>Paso 1 de 3</span><span class="active">Paso 2 de 3</span><span>Paso 3 de 3</span></div>
-    <h2>Ejercicio 2 — Aproximación mediante Taylor</h2>
-    <div class="card">
-      <p><strong>Objetivo:</strong> aproximar una función financiera alrededor de un punto mediante un polinomio de Taylor.</p>
-      <p class="small-note">Una serie de Taylor permite aproximar una función alrededor de un punto \(a\) mediante un polinomio. Se usa, por ejemplo, para estimar el valor presente o el crecimiento continuo de un fondo cuando la evaluación directa es costosa.</p>
-      <div class="formula-box">\( f(x) \approx f(a) + f'(a)(x-a) + \dfrac{f''(a)}{2!}(x-a)^2 + \dots \)</div>
-      <div class="two-col">
-        <div class="field">
-          <label>Función financiera</label>
-          <select id="tay-func">
-            <option value="ln1x">f(x) = ln(1+x)  — crecimiento logarítmico de un fondo</option>
-            <option value="exp">f(x) = eˣ — interés compuesto continuo</option>
-            <option value="inv1x">f(x) = 1/(1+x) — factor de descuento</option>
-            <option value="sin">f(x) = sin(x)</option>
-            <option value="cos">f(x) = cos(x)</option>
-          </select>
+    <!-- LEFT SIDEBAR: EXERCISE NAVIGATION -->
+    <aside class="w-72 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 overflow-y-auto">
+      <div class="p-3 border-b border-slate-800">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Módulos & Ejercicios</span>
+      </div>
+
+      <nav class="p-2 space-y-1 text-sm" id="exerciseNavList">
+        <!-- Exercise Buttons dynamically created / styled -->
+      </nav>
+
+      <div class="mt-auto p-3 border-t border-slate-800 bg-slate-950/50 text-xs text-slate-400">
+        <div class="font-medium text-slate-300 mb-1">Matriz Docentes Sección 8</div>
+        <p class="leading-relaxed text-[11px]">Cálculos validados con la matriz de resultados docentes (precisión de 6 decimales).</p>
+      </div>
+    </aside>
+
+    <!-- RIGHT WORKSPACE PANEL -->
+    <main class="flex-1 flex flex-col overflow-y-auto p-4 md:p-6 space-y-6 bg-slate-950">
+
+      <!-- EXERCISE TITLE & CONTEXT BANNER -->
+      <section class="bg-gradient-to-r from-slate-900 via-slate-900 to-slate-850 p-5 rounded-2xl border border-slate-800 shadow-xl relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-brand-500/5 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span id="badgeExTag" class="px-2.5 py-0.5 text-xs font-semibold rounded-md bg-brand-500/20 text-brand-300 border border-brand-500/30">
+                Ejercicio 19
+              </span>
+              <span id="badgeCategory" class="px-2 py-0.5 text-xs rounded-md bg-slate-800 text-slate-300 border border-slate-700">
+                Transporte Urbano
+              </span>
+            </div>
+            <h2 id="exTitle" class="text-xl md:text-2xl font-bold text-white tracking-tight">Distancia Recorrida por Vehículo</h2>
+            <p id="exDescription" class="text-sm text-slate-300 mt-1 max-w-3xl leading-relaxed">
+              Cálculo de la distancia acumulada integrando la velocidad medida en intervalos de tiempo uniformes.
+            </p>
+          </div>
+          <!-- Reference Matrix Comparison Mini Badge -->
+          <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800 shrink-0 text-right min-w-[200px]">
+            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Referencia Matriz Docente</div>
+            <div id="exRefMatrixVal" class="text-sm font-mono font-bold text-brand-400 mt-0.5">
+              Trapecio = 0.147083 mi
+            </div>
+            <div id="exRefMatrixVal2" class="text-xs font-mono text-accent-300">
+              Simpson Comb. = 0.147072 mi
+            </div>
+          </div>
         </div>
-        <div class="field">
-          <label>Número de términos</label>
-          <select id="tay-terms">
-            <option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option>
-            <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
-          </select>
+      </section>
+
+      <!-- DATA INPUT SECTION & VALIDATION BADGES -->
+      <section class="bg-slate-900 rounded-2xl border border-slate-800 p-5 shadow-lg space-y-4">
+        
+        <!-- MODE SELECTOR TABS & CONTROLS -->
+        <div class="flex flex-wrap items-center justify-between border-b border-slate-800 pb-3 gap-3">
+          <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 space-x-1" id="inputModeTabs">
+            <button onclick="setTabMode('table')" id="tabBtnTable" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-white shadow-sm transition">
+              Tabla Interactiva
+            </button>
+            <button onclick="setTabMode('csv')" id="tabBtnCSV" class="px-3 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-200 transition">
+              Texto CSV / Comas
+            </button>
+            <button onclick="setTabMode('function')" id="tabBtnFunction" class="px-3 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-200 transition">
+              Función f(x)
+            </button>
+          </div>
+
+          <div class="flex items-center space-x-2 text-xs">
+            <!-- Mode-specific buttons -->
+            <button onclick="addRowToTable()" id="btnAddRowBtn" class="px-2.5 py-1.5 rounded-lg bg-brand-600/20 text-brand-300 border border-brand-500/30 hover:bg-brand-600/30 transition flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              Añadir Fila
+            </button>
+            <button onclick="clearDataTable()" id="btnClearTableBtn" class="px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition">
+              Limpiar
+            </button>
+            <button onclick="reloadPresetData()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition">
+              Cargar Preset
+            </button>
+          </div>
         </div>
-        <div class="field"><label>Punto de expansión (a)</label><input type="number" id="tay-a" value="0" step="any"></div>
-        <div class="field"><label>Valor a evaluar (x)</label><input type="number" id="tay-x" value="0.3" step="any"></div>
+
+        <!-- INPUT CONTAINER MODE A: TABLE -->
+        <div id="inputModeTableContainer" class="block">
+          <div class="overflow-x-auto max-h-60 rounded-xl border border-slate-800 bg-slate-950/60 p-2">
+            <table class="w-full text-left text-xs font-mono">
+              <thead>
+                <tr class="text-slate-400 border-b border-slate-800">
+                  <th class="p-2 w-16 text-center">i</th>
+                  <th class="p-2 min-w-[120px]">x (Variable Independiente)</th>
+                  <th class="p-2 min-w-[120px]">y = f(x) (Variable Dependiente)</th>
+                  <th class="p-2 w-16 text-center">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="interactiveTableBody" class="divide-y divide-slate-800/50">
+                <!-- Rows injected dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- INPUT CONTAINER MODE B: CSV TEXT AREA -->
+        <div id="inputModeCSVContainer" class="hidden space-y-3">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Valores de X (separados por comas):</label>
+              <textarea id="csvInputX" rows="3" class="w-full p-2.5 text-xs font-mono bg-slate-950 border border-slate-800 rounded-xl text-brand-300 focus:border-brand-500 focus:outline-none" placeholder="0, 1, 2, 3, 4, 5, 6, 7"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Valores de Y (separados por comas):</label>
+              <textarea id="csvInputY" rows="3" class="w-full p-2.5 text-xs font-mono bg-slate-950 border border-slate-800 rounded-xl text-accent-300 focus:border-accent-500 focus:outline-none" placeholder="0, 14, 39, 69, 95, 114, 129, 139"></textarea>
+            </div>
+          </div>
+          <button onclick="parseCSVInputs()" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-medium text-xs rounded-xl shadow-md transition">
+            Aplicar y Sincronizar Datos CSV
+          </button>
+        </div>
+
+        <!-- INPUT CONTAINER MODE C: ANALYTICAL FUNCTION -->
+        <div id="inputModeFunctionContainer" class="hidden space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="col-span-1 sm:col-span-2">
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Función f(x):</label>
+              <input type="text" id="fnExprInput" class="w-full p-2.5 text-xs font-mono bg-slate-950 border border-slate-800 rounded-xl text-emerald-400 focus:border-brand-500 focus:outline-none" placeholder="x^2 o 24*cosh(x/24)">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Límite Inferior (a):</label>
+              <input type="number" step="any" id="fnParamA" class="w-full p-2.5 text-xs font-mono bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:border-brand-500 focus:outline-none" value="0">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Límite Superior (b):</label>
+              <input type="number" step="any" id="fnParamB" class="w-full p-2.5 text-xs font-mono bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:border-brand-500 focus:outline-none" value="2">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Subintervalos (n):</label>
+              <input type="number" id="fnParamN" min="1" max="100" class="w-full p-2.5 text-xs font-mono bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:border-brand-500 focus:outline-none" value="8">
+            </div>
+          </div>
+          <button onclick="evaluateFunctionDomain()" class="px-4 py-2 bg-accent-600 hover:bg-accent-500 text-white font-medium text-xs rounded-xl shadow-md transition">
+            Generar Puntos e Integrar
+          </button>
+        </div>
+
+        <!-- LIVE VALIDATION STATUS BADGES BAR -->
+        <div id="validationBadgeBar" class="p-3 bg-slate-950 rounded-xl border border-slate-800 flex flex-wrap items-center gap-2 text-xs">
+          <!-- Dynamically populated status badges -->
+        </div>
+
+        <!-- ERROR LOG BANNERS -->
+        <div id="errorAlertBox" class="hidden p-3 bg-red-950/60 border border-red-500/40 rounded-xl text-red-300 text-xs space-y-1">
+          <!-- Dynamic error messages -->
+        </div>
+
+      </section>
+
+      <!-- RESULTS SECTION: METHOD CARDS -->
+      <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- TRAPECIO COMPUESTO CARD -->
+        <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 shadow-lg flex flex-col justify-between relative overflow-hidden group hover:border-slate-700 transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-400">Trapecio Compuesto</span>
+            <span id="badgeStatusTrapezoid" class="px-2 py-0.5 text-[10px] rounded-md font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Válido</span>
+          </div>
+          <div class="my-2">
+            <div id="resTrapezoid" class="text-2xl font-bold font-mono text-white tracking-tight">0.000000</div>
+            <div id="resTrapezoidUnit" class="text-xs font-mono text-slate-400 mt-0.5">unidades</div>
+            <div id="resTrapezoidSecUnit" class="text-[11px] font-mono text-brand-400 mt-0.5">---</div>
+          </div>
+          <div class="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 space-y-0.5">
+            <div class="flex justify-between"><span>Error Abs. ($E_a$):</span><span id="errAbsTrapezoid" class="font-mono text-slate-300">0.000000</span></div>
+            <div class="flex justify-between"><span>Error Rel. ($E\%$):</span><span id="errRelTrapezoid" class="font-mono text-amber-400">0.00%</span></div>
+          </div>
+        </div>
+
+        <!-- SIMPSON 1/3 COMPUESTO CARD -->
+        <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 shadow-lg flex flex-col justify-between relative overflow-hidden group hover:border-slate-700 transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-400">Simpson 1/3 Compuesto</span>
+            <span id="badgeStatusS13" class="px-2 py-0.5 text-[10px] rounded-md font-mono bg-blue-500/20 text-blue-400 border border-blue-500/30">Válido</span>
+          </div>
+          <div class="my-2">
+            <div id="resS13" class="text-2xl font-bold font-mono text-white tracking-tight">0.000000</div>
+            <div id="resS13Unit" class="text-xs font-mono text-slate-400 mt-0.5">unidades</div>
+            <div id="resS13SecUnit" class="text-[11px] font-mono text-brand-400 mt-0.5">---</div>
+          </div>
+          <div class="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 space-y-0.5">
+            <div class="flex justify-between"><span>Error Abs. ($E_a$):</span><span id="errAbsS13" class="font-mono text-slate-300">0.000000</span></div>
+            <div class="flex justify-between"><span>Error Rel. ($E\%$):</span><span id="errRelS13" class="font-mono text-amber-400">0.00%</span></div>
+          </div>
+        </div>
+
+        <!-- SIMPSON 3/8 COMPUESTO CARD -->
+        <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 shadow-lg flex flex-col justify-between relative overflow-hidden group hover:border-slate-700 transition">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-400">Simpson 3/8 Compuesto</span>
+            <span id="badgeStatusS38" class="px-2 py-0.5 text-[10px] rounded-md font-mono bg-purple-500/20 text-purple-400 border border-purple-500/30">Válido</span>
+          </div>
+          <div class="my-2">
+            <div id="resS38" class="text-2xl font-bold font-mono text-white tracking-tight">0.000000</div>
+            <div id="resS38Unit" class="text-xs font-mono text-slate-400 mt-0.5">unidades</div>
+            <div id="resS38SecUnit" class="text-[11px] font-mono text-brand-400 mt-0.5">---</div>
+          </div>
+          <div class="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 space-y-0.5">
+            <div class="flex justify-between"><span>Error Abs. ($E_a$):</span><span id="errAbsS38" class="font-mono text-slate-300">0.000000</span></div>
+            <div class="flex justify-between"><span>Error Rel. ($E\%$):</span><span id="errRelS38" class="font-mono text-amber-400">0.00%</span></div>
+          </div>
+        </div>
+
+        <!-- SIMPSON COMBINADO CARD -->
+        <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 shadow-lg flex flex-col justify-between relative overflow-hidden group hover:border-slate-700 transition border-brand-500/30">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-300">Simpson Combinado Híbrido</span>
+            <span id="badgeStatusSComb" class="px-2 py-0.5 text-[10px] rounded-md font-mono bg-brand-500/20 text-brand-300 border border-brand-500/30">Recomendado</span>
+          </div>
+          <div class="my-2">
+            <div id="resSComb" class="text-2xl font-bold font-mono text-brand-300 tracking-tight">0.000000</div>
+            <div id="resSCombUnit" class="text-xs font-mono text-slate-400 mt-0.5">unidades</div>
+            <div id="resSCombSecUnit" class="text-[11px] font-mono text-brand-400 mt-0.5">---</div>
+          </div>
+          <div class="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 space-y-0.5">
+            <div class="flex justify-between"><span>Error Abs. ($E_a$):</span><span id="errAbsSComb" class="font-mono text-slate-300">0.000000</span></div>
+            <div class="flex justify-between"><span>Error Rel. ($E\%$):</span><span id="errRelSComb" class="font-mono text-emerald-400">0.00%</span></div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- EXPLICIT DOCENT MATRIX COMPARISON TABLE -->
+      <section class="bg-slate-900 rounded-2xl border border-slate-800 p-5 shadow-lg space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+            <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Tabla Comparativa de Métodos y Validación vs Matriz Docente
+          </h3>
+          <span class="text-xs text-slate-400 font-mono">Res. Mínimo 6 Decimales</span>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl border border-slate-800">
+          <table class="w-full text-left text-xs font-mono">
+            <thead>
+              <tr class="bg-slate-950 text-slate-400 border-b border-slate-800">
+                <th class="p-3">Método Numérico</th>
+                <th class="p-3">Resultado Calculado</th>
+                <th class="p-3">Unidades Primarias</th>
+                <th class="p-3">Unidades Secundarias</th>
+                <th class="p-3">Referencia Matriz / Exacto</th>
+                <th class="p-3">Error Absoluto $E_a$</th>
+                <th class="p-3">Error Relativo $E\%$</th>
+                <th class="p-3">Estado Requisitos</th>
+              </tr>
+            </thead>
+            <tbody id="matrixComparisonBody" class="divide-y divide-slate-800/60 bg-slate-900/40">
+              <!-- Dynamically populated comparative rows -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- DYNAMIC GRAPHIC VISUALIZATION (SVG CANVAS) -->
+      <section class="bg-slate-900 rounded-2xl border border-slate-800 p-5 shadow-lg space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+              <svg class="w-4 h-4 text-accent-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
+              Gráfico Dinámico e Interactivo de Integración
+            </h3>
+            <p class="text-xs text-slate-400">Curva interpolada, área bajo la curva y particiones de subintervalos $h$.</p>
+          </div>
+          
+          <div class="flex items-center space-x-2 text-xs">
+            <label class="flex items-center space-x-1 cursor-pointer bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 text-slate-300">
+              <input type="checkbox" id="chkShowTrapezoids" checked onchange="renderDynamicChart()" class="rounded bg-slate-900 border-slate-700 text-brand-500 focus:ring-0">
+              <span>Particiones h</span>
+            </label>
+            <label class="flex items-center space-x-1 cursor-pointer bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 text-slate-300">
+              <input type="checkbox" id="chkShowArea" checked onchange="renderDynamicChart()" class="rounded bg-slate-900 border-slate-700 text-accent-500 focus:ring-0">
+              <span>Área Rellena</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- SVG CHART AREA -->
+        <div class="relative w-full h-80 bg-slate-950 rounded-xl border border-slate-800 overflow-hidden" id="chartContainer">
+          <svg id="svgChart" class="w-full h-full cursor-crosshair" preserveAspectRatio="none">
+            <!-- Grid lines, axes, shapes rendered via JS -->
+          </svg>
+          <!-- Hover Tooltip overlay -->
+          <div id="chartTooltip" class="absolute hidden bg-slate-900/95 border border-slate-700 text-slate-100 p-2 rounded-lg text-xs font-mono shadow-2xl pointer-events-none z-20"></div>
+        </div>
+      </section>
+
+      <!-- INTEGRATION FACTORS & WEIGHTS TABLE (TABLA DE FACTORES / PESOS) -->
+      <section class="bg-slate-900 rounded-2xl border border-slate-800 p-5 shadow-lg space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              Tabla de Factores y Pesos de Integración Numérica
+            </h3>
+            <p class="text-xs text-slate-400">Valores de nodo $x_i$, $f(x_i)$, factores de ponderación $w_i$ y contribución individual a la suma.</p>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto max-h-80 rounded-xl border border-slate-800">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="sticky top-0 bg-slate-950 text-slate-300 border-b border-slate-800 z-10">
+              <tr>
+                <th class="p-2.5 text-center">Nodo (i)</th>
+                <th class="p-2.5">x_i</th>
+                <th class="p-2.5">f(x_i)</th>
+                <th class="p-2.5">Peso Trapecio (w_T)</th>
+                <th class="p-2.5">Contribución Trapecio</th>
+                <th class="p-2.5">Peso S1/3 (w_S13)</th>
+                <th class="p-2.5">Contribución S1/3</th>
+                <th class="p-2.5">Peso S3/8 (w_S38)</th>
+                <th class="p-2.5">Contribución S3/8</th>
+              </tr>
+            </thead>
+            <tbody id="weightsTableBody" class="divide-y divide-slate-800/60 bg-slate-900/40">
+              <!-- Rows injected dynamically -->
+            </tbody>
+            <tfoot id="weightsTableFooter" class="sticky bottom-0 bg-slate-950 font-bold border-t border-slate-800 text-brand-300">
+              <!-- Summary Totals -->
+            </tfoot>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL: FORMULAS & TEORÍA -->
+  <div id="theoryModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+          <svg class="w-5 h-5 text-accent-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          Resumen de Fórmulas de Integración Numérica
+        </h3>
+        <button onclick="toggleTheoryModal()" class="text-slate-400 hover:text-white p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
       </div>
-      <div class="btn-row">
-        <button class="btn" onclick="calcularTaylor()">Calcular aproximación</button>
-        <button class="btn btn-secondary" onclick="limpiarTaylor()">Limpiar</button>
+
+      <div class="space-y-4 text-xs leading-relaxed text-slate-300 font-mono">
+        <!-- Trapecio -->
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+          <div class="font-bold text-brand-400 text-sm mb-1">1. Regla del Trapecio Compuesta</div>
+          <p class="mb-2">Aproxima la función mediante segmentos lineales. Válida para cualquier número de subintervalos $n \ge 1$.</p>
+          <div class="p-2 bg-slate-900 rounded border border-slate-800 text-emerald-300">
+            I_T = (h / 2) * [ f(x_0) + 2 * sum_{i=1}^{n-1} f(x_i) + f(x_n) ]
+          </div>
+        </div>
+
+        <!-- Simpson 1/3 -->
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+          <div class="font-bold text-blue-400 text-sm mb-1">2. Regla de Simpson 1/3 Compuesta</div>
+          <p class="mb-2">Aproxima mediante parábolas de 2do grado. Requiere que el número de subintervalos $n$ sea **PAR**.</p>
+          <div class="p-2 bg-slate-900 rounded border border-slate-800 text-blue-300">
+            I_{S1/3} = (h / 3) * [ f(x_0) + 4 * sum_{impar} f(x_i) + 2 * sum_{par} f(x_i) + f(x_n) ]
+          </div>
+        </div>
+
+        <!-- Simpson 3/8 -->
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+          <div class="font-bold text-purple-400 text-sm mb-1">3. Regla de Simpson 3/8 Compuesta</div>
+          <p class="mb-2">Aproxima mediante cúbicas de 3er grado. Requiere que $n$ sea **MÚLTIPLO DE 3**.</p>
+          <div class="p-2 bg-slate-900 rounded border border-slate-800 text-purple-300">
+            I_{S3/8} = (3h / 8) * [ f(x_0) + 3*f(x_1) + 3*f(x_2) + 2*f(x_3) + ... + f(x_n) ]
+          </div>
+        </div>
+
+        <!-- Combined Simpson -->
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+          <div class="font-bold text-amber-400 text-sm mb-1">4. Método Combinado Híbrido (Simpson 1/3 + 3/8)</div>
+          <p class="mb-2">Permite integrar con precisión polinomial cuando $n$ es impar (e.g., $n=7$ u $n=11$). Se aplican $n-3$ subintervalos con Simpson 1/3 y los últimos 3 con Simpson 3/8.</p>
+          <div class="p-2 bg-slate-900 rounded border border-slate-800 text-amber-300">
+            I_{Comb} = I_{S1/3}(x_0 \dots x_{n-3}) + I_{S3/8}(x_{n-3} \dots x_n)
+          </div>
+        </div>
       </div>
-      <div id="tay-resultados"></div>
-      <div class="table-wrap" id="tay-tabla-wrap" style="margin-top:14px;"></div>
-      <canvas id="tay-chart" height="110" style="margin-top:18px;"></canvas>
-      <div id="tay-conclusion"></div>
     </div>
   </div>
-</section>
 
-<!-- EJERCICIO 3 -->
-<section id="ejercicio3">
-  <div class="container">
-    <div class="progress"><span>Paso 1 de 3</span><span>Paso 2 de 3</span><span class="active">Paso 3 de 3</span></div>
-    <h2>Ejercicio 3 — Análisis financiero mediante sistemas lineales</h2>
-    <div class="card">
-      <p><strong>Objetivo:</strong> determinar el monto óptimo a asignar a cada proyecto de inversión (\(x_1, x_2, x_3\)…) resolviendo el sistema que relaciona sus flujos y restricciones.</p>
-      <div class="btn-row">
-        <label style="margin:0;">Tamaño del sistema:</label>
-        <select id="sys-size" onchange="cambiarTamano()">
-          <option value="3">Sistema 3 × 3</option>
-          <option value="4">Sistema 4 × 4</option>
-        </select>
-        <button class="btn btn-outline" onclick="cargarEjemplo()">Cargar ejemplo</button>
-        <button class="btn btn-secondary" onclick="restablecerEjercicio()">Restablecer ejercicio</button>
-      </div>
-      <div class="table-wrap"><div id="matrix-container"></div></div>
-      <div class="btn-row"><button class="btn" onclick="resolverSistema()">Resolver sistema</button></div>
-      <div id="sys-mensaje"></div>
-    </div>
+  <!-- JAVASCRIPT LOGIC ENGINE -->
+  <script>
+    /* EXERCISE DATABASE DEFINITION */
+    const exercisesData = {
+      valTest: {
+        id: 'valTest',
+        tag: 'Validación',
+        category: 'Test Numérico',
+        title: 'Prueba de Validación: f(x) = x²',
+        description: 'Verificación del algoritmo en el intervalo [0, 2] con integral exacta = 8/3 = 2.666667 u².',
+        refTrapezoid: 2.666667,
+        refSimpson: 2.666667,
+        refExact: 2.666667,
+        primaryUnit: 'u²',
+        secUnitName: null,
+        secUnitFactor: 1,
+        mode: 'function',
+        fnExpr: 'x^2',
+        a: 0,
+        b: 2,
+        n: 8,
+        dataX: [0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0],
+        dataY: [0, 0.0625, 0.25, 0.5625, 1.0, 1.5625, 2.25, 3.0625, 4.0]
+      },
+      ex19: {
+        id: 'ex19',
+        tag: 'Ejercicio 19',
+        category: 'Transporte Urbano',
+        title: 'Distancia Recorrida por Vehículo Urbano',
+        description: 'Integración de velocidad v(t) en mph durante t=[0,7] segundos para determinar la distancia recorrida.',
+        refTrapezoid: 0.147083,
+        refSimpson: 0.147072,
+        refExact: 0.147072,
+        primaryUnit: 'mi',
+        secUnitName: 'm',
+        secUnitFactor: 1609.344,
+        mode: 'table',
+        dataX: [0, 1, 2, 3, 4, 5, 6, 7],
+        dataY: [0, 14, 39, 69, 95, 114, 129, 139],
+        xScaleFactor: 1/3600 // seconds to hours for speed in mph
+      },
+      ex20: {
+        id: 'ex20',
+        tag: 'Ejercicio 20',
+        category: 'Ensayo Elasticidad',
+        title: 'Trabajo Mecánico en Banda Elástica',
+        description: 'Cálculo del trabajo W = ∫ F dx en lb·in a partir del ensayo de tracción (x de 0 a 2.8 pulg, n=7).',
+        refTrapezoid: 4.544000,
+        refSimpson: 4.577167,
+        refExact: 4.577167,
+        primaryUnit: 'lb·in',
+        secUnitName: 'Joules (J)',
+        secUnitFactor: 0.112984829,
+        mode: 'table',
+        dataX: [0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8],
+        dataY: [0, 0.85, 1.30, 1.60, 1.87, 2.14, 2.34, 2.52]
+      },
+      ex21: {
+        id: 'ex21',
+        tag: 'Ejercicio 21',
+        category: 'Perfil Topográfico',
+        title: 'Área Transversal Perfil Topográfico',
+        description: 'Determinación de la superficie transversal de una sección del terreno dada la elevación y(x).',
+        refTrapezoid: 36.400000,
+        refSimpson: 36.850000,
+        refExact: 36.850000,
+        primaryUnit: 'u²',
+        secUnitName: null,
+        secUnitFactor: 1,
+        mode: 'table',
+        dataX: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        dataY: [1.3, 3.7, 4.6, 4.4, 2.7, 2.5, 3.6, 5.3, 6.0, 5.9]
+      },
+      ex22: {
+        id: 'ex22',
+        tag: 'Ejercicio 22',
+        category: 'Catenaria',
+        title: 'Longitud de Cable en Catenaria',
+        description: 'Integral L = ∫ cosh(x/24) dx en [-12, 26] ft con n=8 subintervalos. Valor exacto: 43.898841 ft.',
+        refTrapezoid: 44.042044,
+        refSimpson: 43.899213,
+        refExact: 43.898841,
+        primaryUnit: 'ft',
+        secUnitName: 'metros (m)',
+        secUnitFactor: 0.3048,
+        mode: 'function',
+        fnExpr: 'cosh(x/24)',
+        a: -12,
+        b: 26,
+        n: 8
+      },
+      ex23: {
+        id: 'ex23',
+        tag: 'Ejercicio 23',
+        category: 'Mecánica de Fluidos',
+        title: 'Caudal Volumétrico en Tubería',
+        description: 'Integral Q = ∫ 2π r v(r) dr en r ∈ [0, 0.25] in con n=8. Valor exacto: 12.828170 in³/s.',
+        refTrapezoid: 11.681778,
+        refSimpson: 12.151244,
+        refExact: 12.828170,
+        primaryUnit: 'in³/s',
+        secUnitName: 'cm³/s',
+        secUnitFactor: 16.387064,
+        mode: 'function',
+        fnExpr: '160*pi*x*(1 - 4*x)^(1/7)',
+        a: 0,
+        b: 0.25,
+        n: 8
+      },
+      ex24: {
+        id: 'ex24',
+        tag: 'Ejercicio 24',
+        category: 'Geometría Cardioide',
+        title: 'Longitud de Trayectoria Cardioide',
+        description: 'Integral L = ∫ 20*sin(t/2) dt en t ∈ [0, 2π] con n=8. Valor exacto: 80.000000 u.',
+        refTrapezoid: 78.969264,
+        refSimpson: 80.010767,
+        refExact: 80.000000,
+        primaryUnit: 'unidades',
+        secUnitName: null,
+        secUnitFactor: 1,
+        mode: 'function',
+        fnExpr: '20*sin(x/2)',
+        a: 0,
+        b: 2*Math.PI,
+        n: 8
+      },
+      ex25: {
+        id: 'ex25',
+        tag: 'Ejercicio 25',
+        category: 'Aeroespacial',
+        title: 'Energía de Satélite Orbital',
+        description: 'Trabajo para elevar satélite m=500kg a h=800,000m. Integral de f(y)=m*g0*R²/(R+y)² con n=8.',
+        refTrapezoid: 3.48662008e9,
+        refSimpson: 3.48623690e9,
+        refExact: 3.486236787e9,
+        primaryUnit: 'J',
+        secUnitName: 'Gigajoules (GJ)',
+        secUnitFactor: 1e-9,
+        mode: 'function',
+        fnExpr: '500*9.81*(6371000)^2/(6371000+x)^2',
+        a: 0,
+        b: 800000,
+        n: 8
+      },
+      ex26: {
+        id: 'ex26',
+        tag: 'Ejercicio 26',
+        category: 'Limnología',
+        title: 'Superficie Lago Erie / Titicaca',
+        description: 'Cálculo de la superficie del lago integrando la anchura w(x) en x ∈ [40, 260] mi con h=20 mi.',
+        refTrapezoid: 8460.000000,
+        refSimpson: 8613.333333,
+        refExact: 9940.000000,
+        primaryUnit: 'mi²',
+        secUnitName: 'km²',
+        secUnitFactor: 2.58998811,
+        mode: 'table',
+        dataX: [40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240],
+        dataY: [0, 40, 50, 55, 60, 58, 52, 45, 38, 25, 0]
+      },
+      ex27: {
+        id: 'ex27',
+        tag: 'Ejercicio 27',
+        category: 'Geometría 3D',
+        title: 'Geometría Objeto Alargado (Volumen y Superficie)',
+        description: 'Cálculo del Volumen V = π ∫ r² dz (Ref Trapecio=199.40 in³, Simpson=201.84 in³) y Superficie S = π ∫ d dz.',
+        refTrapezoid: 199.404740,
+        refSimpson: 201.842092,
+        refExact: 201.842092,
+        primaryUnit: 'in³',
+        secUnitName: 'cm³',
+        secUnitFactor: 16.387064,
+        mode: 'table',
+        dataX: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        dataY: [0, 2.6, 3.2, 4.8, 5.6, 6.0, 6.2, 6.0, 5.6, 4.8, 3.3, 2.6, 0],
+        transformYToRadiusSq: true // Convert diameter d_i to pi*(d_i/2)^2 for volume calculation
+      },
+      universal: {
+        id: 'universal',
+        tag: 'Calculadora',
+        category: 'Universal',
+        title: 'Calculadora Universal de Integración Numérica',
+        description: 'Ingrese libremente parejas x,y o defina una función f(x) arbitraria para ejecutar los 4 métodos.',
+        refTrapezoid: null,
+        refSimpson: null,
+        refExact: null,
+        primaryUnit: 'u',
+        secUnitName: null,
+        secUnitFactor: 1,
+        mode: 'function',
+        fnExpr: 'sin(x)',
+        a: 0,
+        b: Math.PI,
+        n: 8
+      }
+    };
 
-    <div class="card">
-      <h3>Solución exacta</h3>
-      <p class="small-note">Se obtiene mediante eliminación gaussiana con pivoteo parcial. Esta solución se utiliza como referencia para comparar las aproximaciones iterativas.</p>
-      <div id="exacta-resultados"></div>
-    </div>
+    /* APP STATE */
+    let currentExId = 'ex19';
+    let currentActiveTab = 'table'; // 'table', 'csv', 'function'
+    let currentX = [];
+    let currentY = [];
+    let currentWeights = [];
 
-    <div class="card">
-      <h3>Factorización LU</h3>
-      <div class="formula-box">\(A = LU\) &nbsp;&nbsp; \(Ly = b\) &nbsp;&nbsp; \(Ux = y\)</div>
-      <div id="lu-resultados"></div>
-    </div>
+    /* INITIALIZATION */
+    window.onload = function() {
+      buildNavigationMenu();
+      loadExercise('ex19');
+    };
 
-    <div class="card">
-      <h3>Método de Jacobi</h3>
-      <div class="formula-box">\( x_i^{(k+1)} = \dfrac{b_i - \sum_{j\neq i} a_{ij}x_j^{(k)}}{a_{ii}} \)</div>
-      <div class="two-col">
-        <div class="field"><label>Valor inicial x₀</label><input type="number" id="jac-x0" value="0" step="any"></div>
-        <div class="field"><label>Tolerancia</label><input type="number" id="jac-tol" value="0.000001" step="any"></div>
-        <div class="field"><label>Máx. iteraciones</label><input type="number" id="jac-max" value="100" step="1"></div>
-      </div>
-      <div class="btn-row"><button class="btn" onclick="ejecutarJacobi()">Ejecutar Jacobi</button></div>
-      <div id="jac-estado"></div>
-      <div class="table-wrap" id="jac-tabla-wrap"></div>
-    </div>
+    /* SIDEBAR NAVIGATION BUILDER */
+    function buildNavigationMenu() {
+      const nav = document.getElementById('exerciseNavList');
+      nav.innerHTML = '';
 
-    <div class="card">
-      <h3>Método de Gauss-Seidel</h3>
-      <p class="small-note">Utiliza los valores actualizados inmediatamente durante cada iteración.</p>
-      <div class="two-col">
-        <div class="field"><label>Valor inicial x₀</label><input type="number" id="gs-x0" value="0" step="any"></div>
-        <div class="field"><label>Tolerancia</label><input type="number" id="gs-tol" value="0.000001" step="any"></div>
-        <div class="field"><label>Máx. iteraciones</label><input type="number" id="gs-max" value="100" step="1"></div>
-      </div>
-      <div class="btn-row"><button class="btn" onclick="ejecutarGaussSeidel()">Ejecutar Gauss-Seidel</button></div>
-      <div id="gs-estado"></div>
-      <div class="table-wrap" id="gs-tabla-wrap"></div>
-    </div>
-  </div>
-</section>
+      Object.keys(exercisesData).forEach(id => {
+        const ex = exercisesData[id];
+        const btn = document.createElement('button');
+        btn.id = `navBtn_${id}`;
+        btn.onclick = () => loadExercise(id);
+        btn.className = `w-full text-left p-2.5 rounded-xl flex items-center justify-between border transition ${
+          id === currentExId 
+            ? 'bg-slate-800 text-brand-300 border-brand-500/40 shadow-sm font-semibold' 
+            : 'text-slate-400 hover:text-slate-200 border-transparent hover:bg-slate-850'
+        }`;
 
-<!-- COMPARACION -->
-<section id="comparacion">
-  <div class="container">
-    <h2>Comparación de resultados</h2>
-    <div class="card">
-      <div class="table-wrap" id="comp-tabla-wrap"><p class="small-note">Resuelve el sistema en el Ejercicio 3 para ver la comparación.</p></div>
-      <canvas id="comp-chart" height="110" style="margin-top:18px;"></canvas>
-    </div>
-  </div>
-</section>
-
-<!-- CONCLUSIONES -->
-<section id="conclusiones">
-  <div class="container">
-    <h2>Conclusiones</h2>
-    <div class="card" id="conclusiones-auto">
-      <p class="small-note">Las conclusiones se generan automáticamente al completar los tres ejercicios.</p>
-    </div>
-  </div>
-</section>
-
-<footer>
-  Este proyecto integra teoría matemática, métodos numéricos, programación e interpretación financiera en una herramienta interactiva.
-</footer>
-
-<script>
-/* ===================== NAV ===================== */
-document.getElementById('hamburgerBtn').addEventListener('click',()=>{
-  document.getElementById('navLinks').classList.toggle('open');
-});
-document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('click',()=>{
-  document.getElementById('navLinks').classList.remove('open');
-}));
-
-/* ===================== UTILIDADES ===================== */
-function factorial(n){let r=1;for(let i=2;i<=n;i++) r*=i;return r;}
-function fmt(n,d=4){ if(n===null||n===undefined||isNaN(n)) return '—'; return Number(n).toFixed(d); }
-function isNumericValid(v){ return v!=='' && !isNaN(parseFloat(v)) && isFinite(v); }
-
-/* ===================== EJERCICIO 1: ERRORES ===================== */
-function calcularError(){
-  const vrEl=document.getElementById('err-vr'), vaEl=document.getElementById('err-va');
-  const out=document.getElementById('err-resultados');
-  if(!isNumericValid(vrEl.value) || !isNumericValid(vaEl.value)){
-    out.innerHTML='<div class="result-box result-bad">⚠ Ingresa valores numéricos válidos en ambos campos.</div>'; return;
-  }
-  const vr=parseFloat(vrEl.value), va=parseFloat(vaEl.value);
-  if(vr===0){
-    out.innerHTML='<div class="result-box result-bad">⚠ El valor verdadero no puede ser 0 (división entre cero en el error relativo).</div>'; return;
-  }
-  const ea=Math.abs(vr-va), er=ea/Math.abs(vr), ep=er*100;
-  let nivel, clase;
-  if(ep<1){nivel='muy cercana al valor verdadero';clase='result-ok';}
-  else if(ep<5){nivel='razonablemente cercana al valor verdadero, con un margen aceptable';clase='result-warn';}
-  else {nivel='alejada del valor verdadero; conviene revisar la fuente del dato';clase='result-bad';}
-  out.innerHTML=`
-    <div class="results-grid">
-      <div class="result-tile"><div class="val">${fmt(ea,4)}</div><div class="lab">Error absoluto</div></div>
-      <div class="result-tile"><div class="val">${fmt(er,6)}</div><div class="lab">Error relativo</div></div>
-      <div class="result-tile"><div class="val">${fmt(ep,4)} %</div><div class="lab">Error porcentual</div></div>
-    </div>
-    <div class="result-box ${clase}">El valor aproximado presenta un error porcentual de ${fmt(ep,4)} %, lo que indica que la aproximación es ${nivel}.</div>
-    <div class="interp">Interpretación financiera: si Vr y Va representan un monto registrado frente a su valor auditado, un error porcentual de ${fmt(ep,2)} % indica qué tan confiable es la cifra utilizada para la toma de decisiones financieras.</div>
-  `;
-}
-function limpiarError(){
-  document.getElementById('err-vr').value=''; document.getElementById('err-va').value='';
-  document.getElementById('err-resultados').innerHTML='';
-}
-
-/* ===================== EJERCICIO 2: TAYLOR ===================== */
-const taylorFunctions = {
-  ln1x:{label:'f(x) = ln(1+x)', f:x=>Math.log(1+x), deriv:(n,a)=> n===0?Math.log(1+a):Math.pow(-1,n+1)*factorial(n-1)/Math.pow(1+a,n), domain:'x > -1', valid:x=>x>-1},
-  exp:{label:'f(x) = eˣ', f:x=>Math.exp(x), deriv:(n,a)=>Math.exp(a), domain:'todo ℝ', valid:()=>true},
-  inv1x:{label:'f(x) = 1/(1+x)', f:x=>1/(1+x), deriv:(n,a)=>Math.pow(-1,n)*factorial(n)/Math.pow(1+a,n+1), domain:'x ≠ -1', valid:x=>x!==-1},
-  sin:{label:'f(x) = sin(x)', f:x=>Math.sin(x), deriv:(n,a)=>{const m=n%4; return m===0?Math.sin(a):m===1?Math.cos(a):m===2?-Math.sin(a):-Math.cos(a);}, domain:'todo ℝ', valid:()=>true},
-  cos:{label:'f(x) = cos(x)', f:x=>Math.cos(x), deriv:(n,a)=>{const m=n%4; return m===0?Math.cos(a):m===1?-Math.sin(a):m===2?-Math.cos(a):Math.sin(a);}, domain:'todo ℝ', valid:()=>true}
-};
-let tayChartObj=null;
-function calcularTaylor(){
-  const key=document.getElementById('tay-func').value;
-  const N=parseInt(document.getElementById('tay-terms').value);
-  const a=parseFloat(document.getElementById('tay-a').value);
-  const x=parseFloat(document.getElementById('tay-x').value);
-  const out=document.getElementById('tay-resultados');
-  const fn=taylorFunctions[key];
-  if(!isNumericValid(document.getElementById('tay-a').value) || !isNumericValid(document.getElementById('tay-x').value)){
-    out.innerHTML='<div class="result-box result-bad">⚠ Ingresa valores numéricos válidos para a y x.</div>'; return;
-  }
-  if(!fn.valid(a) || !fn.valid(x)){
-    out.innerHTML=`<div class="result-box result-bad">⚠ Los valores ingresados están fuera del dominio de la función (${fn.domain}).</div>`; return;
-  }
-  let sum=0, filas=[];
-  for(let n=0;n<N;n++){
-    const term=fn.deriv(n,a)/factorial(n)*Math.pow(x-a,n);
-    sum+=term;
-    const exact=fn.f(x);
-    const errAbs=Math.abs(exact-sum);
-    const errPct= exact!==0 ? errAbs/Math.abs(exact)*100 : 0;
-    filas.push({termino:n+1, approx:sum, errAbs, errPct});
-  }
-  const exact=fn.f(x);
-  const aproxFinal=sum;
-  const errAbsFinal=Math.abs(exact-aproxFinal);
-  const errRelFinal= exact!==0 ? errAbsFinal/Math.abs(exact) : NaN;
-  const errPctFinal= errRelFinal*100;
-
-  out.innerHTML=`
-    <div class="results-grid">
-      <div class="result-tile"><div class="val">${fmt(exact,6)}</div><div class="lab">Valor exacto f(x)</div></div>
-      <div class="result-tile"><div class="val">${fmt(aproxFinal,6)}</div><div class="lab">Aproximación Taylor</div></div>
-      <div class="result-tile"><div class="val">${fmt(errPctFinal,4)} %</div><div class="lab">Error porcentual</div></div>
-    </div>
-    <div class="interp">Con ${N} término(s) alrededor de a = ${a}, la aproximación de ${fn.label} en x = ${x} arroja un error absoluto de ${fmt(errAbsFinal,6)} y un error relativo de ${fmt(errRelFinal,6)}.</div>
-  `;
-
-  let tablaHtml='<table><thead><tr><th>Término</th><th>Aproximación</th><th>Error absoluto</th><th>Error %</th></tr></thead><tbody>';
-  filas.forEach(f=>{
-    tablaHtml+=`<tr><td>${f.termino}</td><td>${fmt(f.approx,6)}</td><td>${fmt(f.errAbs,6)}</td><td>${fmt(f.errPct,4)} %</td></tr>`;
-  });
-  tablaHtml+='</tbody></table>';
-  document.getElementById('tay-tabla-wrap').innerHTML=tablaHtml;
-
-  // Grafica
-  const rango=[];
-  const puntosReal=[], puntosAprox=[];
-  const span=Math.max(1, Math.abs(x-a)*2, 1.5);
-  for(let i=-20;i<=20;i++){
-    const xi=a+(span*i/20);
-    if(!fn.valid(xi)) continue;
-    rango.push(xi.toFixed(2));
-    puntosReal.push(fn.f(xi));
-    let s=0; for(let n=0;n<N;n++) s+=fn.deriv(n,a)/factorial(n)*Math.pow(xi-a,n);
-    puntosAprox.push(s);
-  }
-  if(tayChartObj) tayChartObj.destroy();
-  const ctx=document.getElementById('tay-chart').getContext('2d');
-  tayChartObj=new Chart(ctx,{
-    type:'line',
-    data:{labels:rango, datasets:[
-      {label:'Función original', data:puntosReal, borderColor:'#0f2545', borderWidth:2, pointRadius:0, tension:0.15},
-      {label:'Aproximación Taylor ('+N+' términos)', data:puntosAprox, borderColor:'#c0392b', borderWidth:2, borderDash:[5,4], pointRadius:0, tension:0.15}
-    ]},
-    options:{responsive:true, plugins:{legend:{position:'bottom'}}, scales:{x:{title:{display:true,text:'x'}}}}
-  });
-
-  let conclTxt;
-  if(errPctFinal<1) conclTxt='La aproximación con '+N+' término(s) se encuentra muy cerca del valor real de la función dentro del intervalo analizado.';
-  else if(errPctFinal<10) conclTxt='La aproximación con '+N+' término(s) presenta un error moderado; aumentar el número de términos mejoraría la precisión.';
-  else conclTxt='El error obtenido es considerable. Esto puede deberse a que x está alejado del punto de expansión a, o a que se usaron pocos términos.';
-  document.getElementById('tay-conclusion').innerHTML=`<div class="result-box result-neutral">${conclTxt} A medida que aumenta el número de términos de Taylor, la aproximación se acerca al valor de la función dentro del intervalo donde la serie converge.</div>`;
-}
-function limpiarTaylor(){
-  document.getElementById('tay-resultados').innerHTML='';
-  document.getElementById('tay-tabla-wrap').innerHTML='';
-  document.getElementById('tay-conclusion').innerHTML='';
-  if(tayChartObj){tayChartObj.destroy(); tayChartObj=null;}
-}
-
-/* ===================== EJERCICIO 3: SISTEMAS LINEALES ===================== */
-let sysN=3;
-const ejemplos={
-  3:{A:[[8,1,1],[1,10,2],[2,1,9]], b:[100,150,120]},
-  4:{A:[[10,1,1,1],[1,12,2,1],[1,2,11,1],[1,1,1,9]], b:[130,180,140,90]}
-};
-let ultimaExacta=null, ultimaLU=null, ultimaJacobi=null, ultimaGS=null;
-
-function renderMatrix(){
-  const n=sysN;
-  let html='<table class="matrix-table"><tbody>';
-  for(let i=0;i<n;i++){
-    html+='<tr>';
-    for(let j=0;j<n;j++){
-      html+=`<td><input type="number" id="a-${i}-${j}" step="any"></td>`;
-      if(j<n-1) html+='<td>+</td>';
+        btn.innerHTML = `
+          <div class="flex items-center space-x-2 truncate">
+            <span class="w-2 h-2 rounded-full ${id === 'valTest' ? 'bg-amber-400' : id === 'universal' ? 'bg-accent-400' : 'bg-brand-400'}"></span>
+            <span class="truncate">${ex.tag}: ${ex.category}</span>
+          </div>
+          <svg class="w-4 h-4 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        `;
+        nav.appendChild(btn);
+      });
     }
-    html+=`<td>=</td><td><input type="number" id="b-${i}" step="any"></td></tr>`;
-  }
-  html+='</tbody></table>';
-  document.getElementById('matrix-container').innerHTML=html;
-}
-function cambiarTamano(){
-  sysN=parseInt(document.getElementById('sys-size').value);
-  renderMatrix();
-  limpiarResultadosSistema();
-}
-function cargarEjemplo(){
-  const ej=ejemplos[sysN];
-  for(let i=0;i<sysN;i++){
-    for(let j=0;j<sysN;j++) document.getElementById(`a-${i}-${j}`).value=ej.A[i][j];
-    document.getElementById(`b-${i}`).value=ej.b[i];
-  }
-  document.getElementById('sys-mensaje').innerHTML='';
-}
-function restablecerEjercicio(){
-  renderMatrix();
-  limpiarResultadosSistema();
-  document.getElementById('sys-mensaje').innerHTML='';
-}
-function limpiarResultadosSistema(){
-  document.getElementById('exacta-resultados').innerHTML='';
-  document.getElementById('lu-resultados').innerHTML='';
-  document.getElementById('jac-estado').innerHTML='';
-  document.getElementById('jac-tabla-wrap').innerHTML='';
-  document.getElementById('gs-estado').innerHTML='';
-  document.getElementById('gs-tabla-wrap').innerHTML='';
-  document.getElementById('comp-tabla-wrap').innerHTML='<p class="small-note">Resuelve el sistema en el Ejercicio 3 para ver la comparación.</p>';
-  document.getElementById('conclusiones-auto').innerHTML='<p class="small-note">Las conclusiones se generan automáticamente al completar los tres ejercicios.</p>';
-  ultimaExacta=ultimaLU=ultimaJacobi=ultimaGS=null;
-}
 
-function leerSistema(){
-  const n=sysN, A=[], b=[];
-  for(let i=0;i<n;i++){
-    const fila=[];
-    for(let j=0;j<n;j++){
-      const v=document.getElementById(`a-${i}-${j}`).value;
-      if(!isNumericValid(v)) return {error:'Todos los coeficientes de la matriz deben ser numéricos.'};
-      fila.push(parseFloat(v));
+    /* LOAD EXERCISE STATE */
+    function loadExercise(id) {
+      currentExId = id;
+      const ex = exercisesData[id];
+
+      // Highlight Navigation
+      Object.keys(exercisesData).forEach(k => {
+        const btn = document.getElementById(`navBtn_${k}`);
+        if(btn) {
+          if(k === id) {
+            btn.className = 'w-full text-left p-2.5 rounded-xl flex items-center justify-between border border-brand-500/40 bg-slate-800 text-brand-300 shadow-sm font-semibold';
+          } else {
+            btn.className = 'w-full text-left p-2.5 rounded-xl flex items-center justify-between border border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/50';
+          }
+        }
+      });
+
+      // Update Banner Details
+      document.getElementById('badgeExTag').innerText = ex.tag;
+      document.getElementById('badgeCategory').innerText = ex.category;
+      document.getElementById('exTitle').innerText = ex.title;
+      document.getElementById('exDescription').innerText = ex.description;
+
+      // Update Reference Box
+      document.getElementById('exRefMatrixVal').innerText = ex.refTrapezoid !== null ? `Trapecio: ${ex.refTrapezoid.toFixed(6)} ${ex.primaryUnit}` : 'N/A';
+      document.getElementById('exRefMatrixVal2').innerText = ex.refSimpson !== null ? `Simpson: ${ex.refSimpson.toFixed(6)} ${ex.primaryUnit}` : 'N/A';
+
+      // Set Mode and Populate Data
+      currentActiveTab = ex.mode || 'table';
+      setTabMode(currentActiveTab);
+
+      if(ex.mode === 'function') {
+        document.getElementById('fnExprInput').value = ex.fnExpr || 'x^2';
+        document.getElementById('fnParamA').value = ex.a !== undefined ? ex.a : 0;
+        document.getElementById('fnParamB').value = ex.b !== undefined ? ex.b : 2;
+        document.getElementById('fnParamN').value = ex.n !== undefined ? ex.n : 8;
+        evaluateFunctionDomain();
+      } else {
+        currentX = [...ex.dataX];
+        currentY = [...ex.dataY];
+        syncTableAndCSVViews();
+        runIntegrationPipeline();
+      }
     }
-    A.push(fila);
-    const vb=document.getElementById(`b-${i}`).value;
-    if(!isNumericValid(vb)) return {error:'Todos los valores del vector b deben ser numéricos.'};
-    b.push(parseFloat(vb));
-  }
-  return {A,b};
-}
 
-function gaussianSolve(Ain,bin){
-  const n=Ain.length;
-  const M=Ain.map((row,i)=>[...row, bin[i]]);
-  for(let col=0; col<n; col++){
-    let maxRow=col;
-    for(let r=col+1;r<n;r++) if(Math.abs(M[r][col])>Math.abs(M[maxRow][col])) maxRow=r;
-    if(Math.abs(M[maxRow][col])<1e-10) return {singular:true};
-    [M[col],M[maxRow]]=[M[maxRow],M[col]];
-    for(let r=col+1;r<n;r++){
-      const factor=M[r][col]/M[col][col];
-      for(let c=col;c<=n;c++) M[r][c]-=factor*M[col][c];
+    function reloadPresetData() {
+      loadExercise(currentExId);
     }
-  }
-  const x=new Array(n).fill(0);
-  for(let i=n-1;i>=0;i--){
-    let sum=M[i][n];
-    for(let j=i+1;j<n;j++) sum-=M[i][j]*x[j];
-    x[i]=sum/M[i][i];
-  }
-  return {singular:false, x};
-}
 
-function luDecompose(A){
-  const n=A.length;
-  const L=Array.from({length:n},()=>new Array(n).fill(0));
-  const U=Array.from({length:n},()=>new Array(n).fill(0));
-  for(let i=0;i<n;i++) L[i][i]=1;
-  for(let i=0;i<n;i++){
-    for(let k=i;k<n;k++){
-      let sum=0; for(let j=0;j<i;j++) sum+=L[i][j]*U[j][k];
-      U[i][k]=A[i][k]-sum;
+    /* TAB MODE SWITCHER */
+    function setTabMode(mode) {
+      currentActiveTab = mode;
+      
+      const tabTable = document.getElementById('tabBtnTable');
+      const tabCSV = document.getElementById('tabBtnCSV');
+      const tabFunction = document.getElementById('tabBtnFunction');
+
+      const contTable = document.getElementById('inputModeTableContainer');
+      const contCSV = document.getElementById('inputModeCSVContainer');
+      const contFunction = document.getElementById('inputModeFunctionContainer');
+
+      const addRowBtn = document.getElementById('btnAddRowBtn');
+      const clearTableBtn = document.getElementById('btnClearTableBtn');
+
+      [tabTable, tabCSV, tabFunction].forEach(b => {
+        b.className = 'px-3 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-200 transition';
+      });
+
+      contTable.classList.add('hidden');
+      contCSV.classList.add('hidden');
+      contFunction.classList.add('hidden');
+
+      if(mode === 'table') {
+        tabTable.className = 'px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-white shadow-sm transition';
+        contTable.classList.remove('hidden');
+        addRowBtn.classList.remove('hidden');
+        clearTableBtn.classList.remove('hidden');
+      } else if(mode === 'csv') {
+        tabCSV.className = 'px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-white shadow-sm transition';
+        contCSV.classList.remove('hidden');
+        addRowBtn.classList.add('hidden');
+        clearTableBtn.classList.add('hidden');
+      } else if(mode === 'function') {
+        tabFunction.className = 'px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-white shadow-sm transition';
+        contFunction.classList.remove('hidden');
+        addRowBtn.classList.add('hidden');
+        clearTableBtn.classList.add('hidden');
+      }
     }
-    if(Math.abs(U[i][i])<1e-10) return {singular:true};
-    for(let k=i+1;k<n;k++){
-      let sum=0; for(let j=0;j<i;j++) sum+=L[k][j]*U[j][i];
-      L[k][i]=(A[k][i]-sum)/U[i][i];
+
+    /* TABLE / CSV SYNCHRONIZATION */
+    function syncTableAndCSVViews() {
+      // Sync Interactive Table
+      const tbody = document.getElementById('interactiveTableBody');
+      tbody.innerHTML = '';
+
+      for(let i = 0; i < currentX.length; i++) {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/40 transition';
+        tr.innerHTML = `
+          <td class="p-2 text-center text-slate-500 font-semibold">${i}</td>
+          <td class="p-2"><input type="number" step="any" onchange="onTableCellEdit(${i}, 'x', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1 text-brand-300 focus:outline-none focus:border-brand-500" value="${currentX[i]}"></td>
+          <td class="p-2"><input type="number" step="any" onchange="onTableCellEdit(${i}, 'y', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1 text-accent-300 focus:outline-none focus:border-accent-500" value="${currentY[i]}"></td>
+          <td class="p-2 text-center"><button onclick="removeTableRow(${i})" class="text-red-400 hover:text-red-300 p-1">✕</button></td>
+        `;
+        tbody.appendChild(tr);
+      }
+
+      // Sync CSV textareas
+      document.getElementById('csvInputX').value = currentX.join(', ');
+      document.getElementById('csvInputY').value = currentY.join(', ');
     }
-  }
-  return {singular:false, L, U};
-}
-function luSolve(L,U,b){
-  const n=b.length;
-  const y=new Array(n).fill(0);
-  for(let i=0;i<n;i++){
-    let sum=b[i]; for(let j=0;j<i;j++) sum-=L[i][j]*y[j];
-    y[i]=sum;
-  }
-  const x=new Array(n).fill(0);
-  for(let i=n-1;i>=0;i--){
-    let sum=y[i]; for(let j=i+1;j<n;j++) sum-=U[i][j]*x[j];
-    x[i]=sum/U[i][i];
-  }
-  return x;
-}
-function isDiagDominant(A){
-  const n=A.length;
-  for(let i=0;i<n;i++){
-    let sum=0; for(let j=0;j<n;j++) if(j!==i) sum+=Math.abs(A[i][j]);
-    if(Math.abs(A[i][i])<sum) return false;
-  }
-  return true;
-}
-function jacobiSolve(A,b,x0,tol,maxIter){
-  const n=A.length; let x=new Array(n).fill(x0);
-  const iter=[];
-  for(let k=1;k<=maxIter;k++){
-    const xNew=new Array(n).fill(0);
-    for(let i=0;i<n;i++){
-      if(Math.abs(A[i][i])<1e-12) return {error:true};
-      let sum=0; for(let j=0;j<n;j++) if(j!==i) sum+=A[i][j]*x[j];
-      xNew[i]=(b[i]-sum)/A[i][i];
+
+    function onTableCellEdit(index, axis, value) {
+      const val = parseFloat(value);
+      if(!isNaN(val)) {
+        if(axis === 'x') currentX[index] = val;
+        else currentY[index] = val;
+        runIntegrationPipeline();
+      }
     }
-    const err=Math.max(...xNew.map((v,i)=>Math.abs(v-x[i])));
-    iter.push({k, x:[...xNew], err});
-    x=xNew;
-    if(err<tol) return {converged:true, iter, x};
-  }
-  return {converged:false, iter, x};
-}
-function gaussSeidelSolve(A,b,x0,tol,maxIter){
-  const n=A.length; let x=new Array(n).fill(x0);
-  const iter=[];
-  for(let k=1;k<=maxIter;k++){
-    const xOld=[...x];
-    for(let i=0;i<n;i++){
-      if(Math.abs(A[i][i])<1e-12) return {error:true};
-      let sum=0; for(let j=0;j<n;j++) if(j!==i) sum+=A[i][j]*x[j];
-      x[i]=(b[i]-sum)/A[i][i];
+
+    function addRowToTable() {
+      const lastX = currentX.length > 0 ? currentX[currentX.length - 1] : 0;
+      const lastY = currentY.length > 0 ? currentY[currentY.length - 1] : 0;
+      currentX.push(lastX + 1);
+      currentY.push(lastY);
+      syncTableAndCSVViews();
+      runIntegrationPipeline();
     }
-    const err=Math.max(...x.map((v,i)=>Math.abs(v-xOld[i])));
-    iter.push({k, x:[...x], err});
-    if(err<tol) return {converged:true, iter, x};
-  }
-  return {converged:false, iter, x};
-}
 
-function varLabels(n){return Array.from({length:n},(_,i)=>'x'+(i+1));}
-
-function resolverSistema(){
-  const sistema=leerSistema();
-  const msg=document.getElementById('sys-mensaje');
-  if(sistema.error){ msg.innerHTML=`<div class="result-box result-bad">⚠ ${sistema.error}</div>`; return; }
-  msg.innerHTML='';
-  const {A,b}=sistema;
-
-  // Solución exacta
-  const exacta=gaussianSolve(A,b);
-  if(exacta.singular){
-    document.getElementById('exacta-resultados').innerHTML='<div class="result-box result-bad">⚠ La matriz ingresada no permite obtener una solución única (sistema singular).</div>';
-    ultimaExacta=null;
-  } else {
-    ultimaExacta={x:exacta.x};
-    let html='<div class="results-grid">';
-    exacta.x.forEach((v,i)=>{ html+=`<div class="result-tile"><div class="val">${fmt(v,4)}</div><div class="lab">x${i+1}</div></div>`; });
-    html+='</div><div class="interp">Esta solución se utiliza como referencia para comparar las aproximaciones obtenidas mediante los métodos iterativos. Cada xᵢ representa el monto óptimo estimado para la variable financiera correspondiente.</div>';
-    document.getElementById('exacta-resultados').innerHTML=html;
-  }
-
-  // LU
-  const lu=luDecompose(A);
-  if(lu.singular){
-    document.getElementById('lu-resultados').innerHTML='<div class="result-box result-bad">⚠ No fue posible factorizar la matriz mediante LU sin pivoteo (pivote nulo). Prueba reordenando las ecuaciones.</div>';
-    ultimaLU=null;
-  } else {
-    const xLU=luSolve(lu.L, lu.U, b);
-    ultimaLU={x:xLU};
-    let matL=lu.L.map(r=>r.map(v=>fmt(v,3)).join(' &nbsp; ')).join('<br>');
-    let matU=lu.U.map(r=>r.map(v=>fmt(v,3)).join(' &nbsp; ')).join('<br>');
-    let html=`<div class="two-col"><div><strong>L =</strong><div class="formula-box">${matL}</div></div><div><strong>U =</strong><div class="formula-box">${matU}</div></div></div>`;
-    html+='<div class="results-grid">';
-    xLU.forEach((v,i)=>{
-      const errA = ultimaExacta ? Math.abs(v-ultimaExacta.x[i]) : NaN;
-      html+=`<div class="result-tile"><div class="val">${fmt(v,4)}</div><div class="lab">x${i+1} (LU)</div></div>`;
-    });
-    html+='</div>';
-    if(ultimaExacta){
-      const errores=xLU.map((v,i)=>Math.abs(v-ultimaExacta.x[i]));
-      const maxErr=Math.max(...errores);
-      html+=`<div class="interp">Error absoluto máximo respecto a la solución exacta: ${fmt(maxErr,6)}. El método LU permitió obtener una solución directa, utilizada como referencia para comparar los métodos iterativos.</div>`;
+    function removeTableRow(index) {
+      if(currentX.length <= 2) {
+        alert("Se requieren al menos 2 puntos para realizar la integración numérica.");
+        return;
+      }
+      currentX.splice(index, 1);
+      currentY.splice(index, 1);
+      syncTableAndCSVViews();
+      runIntegrationPipeline();
     }
-    document.getElementById('lu-resultados').innerHTML=html;
-  }
 
-  // limpiar jacobi/gs previos ya que cambió el sistema
-  document.getElementById('jac-estado').innerHTML='<p class="small-note">Presiona "Ejecutar Jacobi" para calcular.</p>';
-  document.getElementById('jac-tabla-wrap').innerHTML='';
-  document.getElementById('gs-estado').innerHTML='<p class="small-note">Presiona "Ejecutar Gauss-Seidel" para calcular.</p>';
-  document.getElementById('gs-tabla-wrap').innerHTML='';
-  ultimaJacobi=ultimaGS=null;
-  actualizarComparacion();
-}
+    function clearDataTable() {
+      currentX = [0, 1];
+      currentY = [0, 0];
+      syncTableAndCSVViews();
+      runIntegrationPipeline();
+    }
 
-function ejecutarJacobi(){
-  const sistema=leerSistema();
-  if(sistema.error){ document.getElementById('jac-estado').innerHTML=`<div class="result-box result-bad">⚠ ${sistema.error}</div>`; return; }
-  const {A,b}=sistema;
-  const x0=parseFloat(document.getElementById('jac-x0').value);
-  const tol=parseFloat(document.getElementById('jac-tol').value);
-  const maxIter=parseInt(document.getElementById('jac-max').value);
-  if(!isNumericValid(document.getElementById('jac-x0').value) || !isNumericValid(document.getElementById('jac-tol').value) || tol<=0){
-    document.getElementById('jac-estado').innerHTML='<div class="result-box result-bad">⚠ Tolerancia inválida. Debe ser un número positivo.</div>'; return;
-  }
-  if(!Number.isInteger(maxIter) || maxIter<=0){
-    document.getElementById('jac-estado').innerHTML='<div class="result-box result-bad">⚠ El número máximo de iteraciones debe ser un entero positivo.</div>'; return;
-  }
-  const res=jacobiSolve(A,b,x0,tol,maxIter);
-  if(res.error){ document.getElementById('jac-estado').innerHTML='<div class="result-box result-bad">⚠ Un elemento de la diagonal es cero; el método de Jacobi no puede aplicarse tal como está planteado el sistema.</div>'; return; }
-  const dom=isDiagDominant(A);
-  ultimaJacobi={x:res.x, iter:res.iter.length, converged:res.converged};
-  let estadoHtml;
-  if(res.converged){
-    estadoHtml=`<div class="result-box result-ok">✓ CONVERGE — El método converge ${dom?'debido a que la matriz es diagonalmente dominante':'en ' + res.iter.length + ' iteraciones, dentro de la tolerancia establecida'}. Se alcanzó la tolerancia en ${res.iter.length} iteraciones.</div>`;
-  } else {
-    estadoHtml=`<div class="result-box result-bad">✗ DIVERGE — El método no converge para este sistema bajo las condiciones actuales${dom?'':' (la matriz no es diagonalmente dominante)'}. No se alcanzó la tolerancia en ${maxIter} iteraciones.</div>`;
-  }
-  document.getElementById('jac-estado').innerHTML=estadoHtml;
-  document.getElementById('jac-tabla-wrap').innerHTML=tablaIteraciones(res.iter, sysN);
-  actualizarComparacion();
-}
+    function parseCSVInputs() {
+      const strX = document.getElementById('csvInputX').value;
+      const strY = document.getElementById('csvInputY').value;
 
-function ejecutarGaussSeidel(){
-  const sistema=leerSistema();
-  if(sistema.error){ document.getElementById('gs-estado').innerHTML=`<div class="result-box result-bad">⚠ ${sistema.error}</div>`; return; }
-  const {A,b}=sistema;
-  const x0=parseFloat(document.getElementById('gs-x0').value);
-  const tol=parseFloat(document.getElementById('gs-tol').value);
-  const maxIter=parseInt(document.getElementById('gs-max').value);
-  if(!isNumericValid(document.getElementById('gs-x0').value) || !isNumericValid(document.getElementById('gs-tol').value) || tol<=0){
-    document.getElementById('gs-estado').innerHTML='<div class="result-box result-bad">⚠ Tolerancia inválida. Debe ser un número positivo.</div>'; return;
-  }
-  if(!Number.isInteger(maxIter) || maxIter<=0){
-    document.getElementById('gs-estado').innerHTML='<div class="result-box result-bad">⚠ El número máximo de iteraciones debe ser un entero positivo.</div>'; return;
-  }
-  const res=gaussSeidelSolve(A,b,x0,tol,maxIter);
-  if(res.error){ document.getElementById('gs-estado').innerHTML='<div class="result-box result-bad">⚠ Un elemento de la diagonal es cero; el método de Gauss-Seidel no puede aplicarse tal como está planteado el sistema.</div>'; return; }
-  const dom=isDiagDominant(A);
-  ultimaGS={x:res.x, iter:res.iter.length, converged:res.converged};
-  let estadoHtml;
-  if(res.converged){
-    let comp = ultimaJacobi && ultimaJacobi.converged ? (res.iter.length < ultimaJacobi.iter ? ' Necesitó menos iteraciones que Jacobi, por lo que presentó una convergencia más rápida.' : (res.iter.length > ultimaJacobi.iter ? ' Necesitó más iteraciones que Jacobi en este caso.' : ' Necesitó el mismo número de iteraciones que Jacobi.')) : '';
-    estadoHtml=`<div class="result-box result-ok">✓ CONVERGE — El método converge ${dom?'debido a que la matriz es diagonalmente dominante':'en ' + res.iter.length + ' iteraciones'}. Se alcanzó la tolerancia en ${res.iter.length} iteraciones.${comp}</div>`;
-  } else {
-    estadoHtml=`<div class="result-box result-bad">✗ DIVERGE — El método no converge para este sistema bajo las condiciones actuales. No se alcanzó la tolerancia en ${maxIter} iteraciones.</div>`;
-  }
-  document.getElementById('gs-estado').innerHTML=estadoHtml;
-  document.getElementById('gs-tabla-wrap').innerHTML=tablaIteraciones(res.iter, sysN);
-  actualizarComparacion();
-}
+      const arrX = strX.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
+      const arrY = strY.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
 
-function tablaIteraciones(iterArr, n){
-  const labels=varLabels(n);
-  let html='<table><thead><tr><th>Iteración</th>';
-  labels.forEach(l=>html+=`<th>${l}</th>`);
-  html+='<th>Error</th></tr></thead><tbody>';
-  const mostrar = iterArr.length>30 ? iterArr.filter((_,i)=> i<10 || i>=iterArr.length-10) : iterArr;
-  mostrar.forEach((it,idx)=>{
-    if(iterArr.length>30 && idx===10) html+=`<tr><td colspan="${n+2}">⋯</td></tr>`;
-    html+=`<tr><td>${it.k}</td>`;
-    it.x.forEach(v=>html+=`<td>${fmt(v,5)}</td>`);
-    html+=`<td>${fmt(it.err,6)}</td></tr>`;
-  });
-  html+='</tbody></table>';
-  return html;
-}
+      currentX = arrX;
+      currentY = arrY;
+      syncTableAndCSVViews();
+      runIntegrationPipeline();
+    }
 
-let compChartObj=null;
-function actualizarComparacion(){
-  const wrap=document.getElementById('comp-tabla-wrap');
-  if(!ultimaExacta){ wrap.innerHTML='<p class="small-note">Resuelve el sistema en el Ejercicio 3 para ver la comparación.</p>'; return; }
-  const n=sysN, labels=varLabels(n);
-  let html='<table><thead><tr><th>Método</th>';
-  labels.forEach(l=>html+=`<th>${l}</th>`);
-  html+='<th>Iteraciones</th><th>Error máx.</th><th>Estado</th></tr></thead><tbody>';
+    /* SAFE MATHEMATICAL EXPRESSION EVALUATOR (CORREGIDO) */
+    function evaluateMathExpr(expr, xVal) {
+      try {
+        let cleaned = expr.trim();
+        // Replace ^ with **
+        cleaned = cleaned.replace(/\^/g, '**');
 
-  html+='<tr><td>Exacta</td>';
-  ultimaExacta.x.forEach(v=>html+=`<td>${fmt(v,4)}</td>`);
-  html+='<td>-</td><td>-</td><td>Referencia</td></tr>';
+        // Handle implicit multiplication: e.g. 2x -> 2*x, 2( -> 2*(, )x -> )*x
+        cleaned = cleaned.replace(/(\d)\s*([a-zA-Z\(])/g, '$1*$2');
+        cleaned = cleaned.replace(/(\))\s*([\d a-zA-Z\(])/g, '$1*$2');
 
-  if(ultimaLU){
-    const errMax=Math.max(...ultimaLU.x.map((v,i)=>Math.abs(v-ultimaExacta.x[i])));
-    html+='<tr><td>LU</td>';
-    ultimaLU.x.forEach(v=>html+=`<td>${fmt(v,4)}</td>`);
-    html+=`<td>-</td><td>${fmt(errMax,6)}</td><td>Directo</td></tr>`;
-  }
-  if(ultimaJacobi){
-    const errMax=ultimaJacobi.x.map((v,i)=>Math.abs(v-ultimaExacta.x[i]));
-    html+='<tr><td>Jacobi</td>';
-    ultimaJacobi.x.forEach(v=>html+=`<td>${fmt(v,4)}</td>`);
-    html+=`<td>${ultimaJacobi.iter}</td><td>${fmt(Math.max(...errMax),6)}</td><td>${ultimaJacobi.converged?'✓ Converge':'✗ Diverge'}</td></tr>`;
-  }
-  if(ultimaGS){
-    const errMax=ultimaGS.x.map((v,i)=>Math.abs(v-ultimaExacta.x[i]));
-    html+='<tr><td>Gauss-Seidel</td>';
-    ultimaGS.x.forEach(v=>html+=`<td>${fmt(v,4)}</td>`);
-    html+=`<td>${ultimaGS.iter}</td><td>${fmt(Math.max(...errMax),6)}</td><td>${ultimaGS.converged?'✓ Converge':'✗ Diverge'}</td></tr>`;
-  }
-  html+='</tbody></table>';
-  wrap.innerHTML=html;
+        // Replace math functions using exact word boundaries \b to prevent partial overwrites (e.g. cosh vs cos)
+        cleaned = cleaned
+          .replace(/\bcosh\b/gi, 'Math.cosh')
+          .replace(/\bsinh\b/gi, 'Math.sinh')
+          .replace(/\btanh\b/gi, 'Math.tanh')
+          .replace(/\bcos\b/gi, 'Math.cos')
+          .replace(/\bsin\b/gi, 'Math.sin')
+          .replace(/\btan\b/gi, 'Math.tan')
+          .replace(/\bsqrt\b/gi, 'Math.sqrt')
+          .replace(/\bexp\b/gi, 'Math.exp')
+          .replace(/\bln\b/gi, 'Math.log')
+          .replace(/\blog\b/gi, 'Math.log10')
+          .replace(/\babs\b/gi, 'Math.abs')
+          .replace(/\bpi\b/gi, 'Math.PI')
+          .replace(/\be\b/g, 'Math.E');
 
-  // grafica comparativa de iteraciones necesarias
-  const labelsChart=[], dataChart=[];
-  if(ultimaJacobi && ultimaJacobi.converged){labelsChart.push('Jacobi'); dataChart.push(ultimaJacobi.iter);}
-  if(ultimaGS && ultimaGS.converged){labelsChart.push('Gauss-Seidel'); dataChart.push(ultimaGS.iter);}
-  if(labelsChart.length){
-    if(compChartObj) compChartObj.destroy();
-    const ctx=document.getElementById('comp-chart').getContext('2d');
-    compChartObj=new Chart(ctx,{type:'bar', data:{labels:labelsChart, datasets:[{label:'Iteraciones necesarias', data:dataChart, backgroundColor:['#1e5fae','#1c8a4b']}]}, options:{plugins:{legend:{display:false}}, scales:{y:{title:{display:true,text:'Iteraciones'}}}}});
-  }
+        const fn = new Function('x', `return ${cleaned};`);
+        const res = fn(xVal);
+        return typeof res === 'number' ? res : NaN;
+      } catch (err) {
+        console.error("Error de sintaxis en f(x):", err);
+        return NaN;
+      }
+    }
 
-  generarConclusiones();
-}
+    /* EVALUATE FUNCTION DOMAIN (CORREGIDO) */
+    function evaluateFunctionDomain() {
+      const expr = document.getElementById('fnExprInput').value;
+      const a = parseFloat(document.getElementById('fnParamA').value);
+      const b = parseFloat(document.getElementById('fnParamB').value);
+      const n = parseInt(document.getElementById('fnParamN').value);
 
-function generarConclusiones(){
-  const box=document.getElementById('conclusiones-auto');
-  let parrafos=[];
-  parrafos.push('El análisis de errores permite determinar la diferencia entre los valores exactos y aproximados de una cifra financiera, y cuantificar qué tan confiable es una estimación.');
-  parrafos.push('En la aproximación de Taylor, el error disminuye conforme aumenta el número de términos utilizados, siempre dentro de la región donde la serie converge.');
-  if(ultimaLU) parrafos.push('El método LU permitió obtener una solución directa del sistema financiero y fue utilizado como referencia para comparar los métodos iterativos.');
-  if(ultimaJacobi && ultimaGS && ultimaJacobi.converged && ultimaGS.converged){
-    if(ultimaGS.iter < ultimaJacobi.iter) parrafos.push(`Para el sistema analizado, Gauss-Seidel alcanzó la tolerancia establecida en menos iteraciones (${ultimaGS.iter}) que Jacobi (${ultimaJacobi.iter}), por lo que presentó una convergencia más rápida.`);
-    else if(ultimaGS.iter > ultimaJacobi.iter) parrafos.push(`Para el sistema analizado, Jacobi alcanzó la tolerancia establecida en menos iteraciones (${ultimaJacobi.iter}) que Gauss-Seidel (${ultimaGS.iter}).`);
-    else parrafos.push('Ambos métodos iterativos necesitaron el mismo número de iteraciones para alcanzar la tolerancia establecida.');
-  } else if(ultimaJacobi && !ultimaJacobi.converged){
-    parrafos.push('El método de Jacobi no alcanzó convergencia con los parámetros actuales; se recomienda revisar la dominancia diagonal de la matriz o ajustar la tolerancia y el número máximo de iteraciones.');
-  } else if(ultimaGS && !ultimaGS.converged){
-    parrafos.push('El método de Gauss-Seidel no alcanzó convergencia con los parámetros actuales; se recomienda revisar la dominancia diagonal de la matriz.');
-  }
-  box.innerHTML=parrafos.map(p=>`<p>${p}</p>`).join('');
-}
-renderMatrix();
-cargarEjemplo();
-</script>
+      if(isNaN(a) || isNaN(b) || isNaN(n) || n < 1) {
+        alert("Por favor ingrese valores numéricos válidos para a, b y n.");
+        return;
+      }
+
+      if(a >= b) {
+        alert("El límite inferior 'a' debe ser estrictamente menor al límite superior 'b'.");
+        return;
+      }
+
+      const h = (b - a) / n;
+      const newX = [];
+      const newY = [];
+
+      for(let i = 0; i <= n; i++) {
+        const x_i = a + i * h;
+        const y_i = evaluateMathExpr(expr, x_i);
+        if(isNaN(y_i)) {
+          alert(`Error al evaluar la función en x = ${x_i.toFixed(4)}. Verifique la sintaxis introducida (ejemplos: x^2, 24*cosh(x/24), 20*sin(x/2)).`);
+          return;
+        }
+        newX.push(parseFloat(x_i.toFixed(8)));
+        newY.push(parseFloat(y_i.toFixed(8)));
+      }
+
+      currentX = newX;
+      currentY = newY;
+      syncTableAndCSVViews();
+      runIntegrationPipeline();
+    }
+
+    /* CORE NUMERICAL INTEGRATION PIPELINE & VALIDATIONS */
+    function runIntegrationPipeline() {
+      const ex = exercisesData[currentExId];
+      const errorBox = document.getElementById('errorAlertBox');
+      const badgeBar = document.getElementById('validationBadgeBar');
+
+      errorBox.classList.add('hidden');
+      errorBox.innerHTML = '';
+      badgeBar.innerHTML = '';
+
+      let errors = [];
+      let warnings = [];
+
+      // 1. Array Length Validation
+      if(currentX.length !== currentY.length) {
+        errors.push(`Las listas X e Y tienen longitudes diferentes: len(X)=${currentX.length}, len(Y)=${currentY.length}.`);
+      }
+
+      // 2. Minimum Points Check
+      if(currentX.length < 2) {
+        errors.push("Se necesitan al menos 2 puntos de datos (n ≥ 1 subintervalo).");
+      }
+
+      // 3. Monotonicity & Increasing X Check
+      for(let i = 1; i < currentX.length; i++) {
+        if(currentX[i] <= currentX[i-1]) {
+          errors.push(`Los valores de X no son strictly crecientes en i=${i}: x[${i-1}] = ${currentX[i-1]} ≥ x[${i}] = ${currentX[i]}.`);
+          break;
+        }
+      }
+
+      // 4. Uniform Spacing Check
+      const n = currentX.length - 1;
+      let isUniform = true;
+      let h_avg = 0;
+      let maxHDev = 0;
+
+      if(n >= 1 && errors.length === 0) {
+        const steps = [];
+        for(let i = 0; i < n; i++) steps.push(currentX[i+1] - currentX[i]);
+        h_avg = steps.reduce((a,b) => a+b, 0) / n;
+        steps.forEach(st => {
+          const dev = Math.abs(st - h_avg);
+          if(dev > 1e-5) isUniform = false;
+          if(dev > maxHDev) maxHDev = dev;
+        });
+      }
+
+      if(!isUniform) {
+        warnings.push(`Advertencia: Espaciamiento no uniforme detectado. Desviación máxima = ${maxHDev.toFixed(6)}. Se empleará paso medio h = ${h_avg.toFixed(6)}.`);
+      }
+
+      // Populate Validation Badges
+      badgeBar.innerHTML = `
+        <span class="px-2.5 py-1 rounded-lg ${errors.length === 0 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-red-500/20 text-red-300 border border-red-500/30'} font-mono">
+          Puntos N = ${currentX.length} (n = ${n})
+        </span>
+        <span class="px-2.5 py-1 rounded-lg ${isUniform ? 'bg-brand-500/20 text-brand-300 border border-brand-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'} font-mono">
+          Paso h = ${h_avg.toFixed(6)}
+        </span>
+        <span class="px-2.5 py-1 rounded-lg ${n % 2 === 0 ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : 'bg-slate-800 text-slate-400 border border-slate-700'} font-mono">
+          n=${n} (${n % 2 === 0 ? 'Par - Simpson 1/3 OK' : 'Impar - S1/3 requiere adaptación'})
+        </span>
+        <span class="px-2.5 py-1 rounded-lg ${n % 3 === 0 ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-slate-800 text-slate-400 border border-slate-700'} font-mono">
+          ${n % 3 === 0 ? 'Múltiplo de 3 - Simpson 3/8 OK' : 'No múltiplo de 3'}
+        </span>
+      `;
+
+      if(errors.length > 0) {
+        errorBox.classList.remove('hidden');
+        errorBox.innerHTML = errors.map(e => `<div>• ${e}</div>`).join('');
+        return;
+      }
+
+      /* PREPARE Y-VALUES FOR CALCULATIONS (e.g. Ejercicio 27 Volume Transformation) */
+      let yValues = [...currentY];
+      if(ex.transformYToRadiusSq) {
+        // Exercise 27 Volume: V = pi * integral r^2 dz, where r = d/2
+        yValues = currentY.map(d => Math.PI * Math.pow(d / 2, 2));
+      }
+
+      // Apply X-scale factor if specified (e.g. Exercise 19 seconds to hours)
+      const h = h_avg * (ex.xScaleFactor || 1);
+
+      /* COMPUTE INTEGRALS */
+      // 1. TRAPECIO COMPUESTO
+      let sumTrapezoid = yValues[0] + yValues[n];
+      for(let i = 1; i < n; i++) sumTrapezoid += 2 * yValues[i];
+      const resTrapezoid = (h / 2) * sumTrapezoid;
+
+      // 2. SIMPSON 1/3 COMPUESTO
+      let resS13 = null;
+      let isValidS13 = (n % 2 === 0);
+      if(isValidS13) {
+        let sumS13 = yValues[0] + yValues[n];
+        for(let i = 1; i < n; i++) {
+          sumS13 += (i % 2 !== 0 ? 4 : 2) * yValues[i];
+        }
+        resS13 = (h / 3) * sumS13;
+      }
+
+      // 3. SIMPSON 3/8 COMPUESTO
+      let resS38 = null;
+      let isValidS38 = (n % 3 === 0);
+      if(isValidS38) {
+        let sumS38 = yValues[0] + yValues[n];
+        for(let i = 1; i < n; i++) {
+          sumS38 += (i % 3 === 0 ? 2 : 3) * yValues[i];
+        }
+        resS38 = (3 * h / 8) * sumS38;
+      }
+
+      // 4. SIMPSON COMBINADO (HYBRID FOR ODD OR GENERAL N)
+      let resSComb = null;
+      if(isValidS13) {
+        resSComb = resS13;
+      } else if(n === 7 || n % 2 !== 0) {
+        // First (n-3) subintervals with Simpson 1/3 + Last 3 subintervals with Simpson 3/8
+        const n1 = n - 3; // Even
+        let sumPart1 = yValues[0] + yValues[n1];
+        for(let i = 1; i < n1; i++) {
+          sumPart1 += (i % 2 !== 0 ? 4 : 2) * yValues[i];
+        }
+        const int1 = (h / 3) * sumPart1;
+
+        const sumPart2 = yValues[n1] + 3*yValues[n1+1] + 3*yValues[n1+2] + yValues[n];
+        const int2 = (3 * h / 8) * sumPart2;
+
+        resSComb = int1 + int2;
+      }
+
+      /* UPDATE RESULT CARDS */
+      updateResultCard('Trapezoid', resTrapezoid, true, ex);
+      updateResultCard('S13', resS13, isValidS13, ex);
+      updateResultCard('S38', resS38, isValidS38, ex);
+      updateResultCard('SComb', resSComb, true, ex);
+
+      /* POPULATE WEIGHTS & FACTORS MATRIX TABLE */
+      populateWeightsTable(n, h, yValues);
+
+      /* POPULATE COMPARATIVE DOCENTE MATRIX TABLE */
+      populateComparisonMatrixTable(resTrapezoid, resS13, resS38, resSComb, ex);
+
+      /* RENDER GRAPHIC CHART */
+      renderDynamicChart();
+    }
+
+    /* RESULT CARD UPDATER */
+    function updateResultCard(key, val, isValid, ex) {
+      const elVal = document.getElementById(`res${key}`);
+      const elUnit = document.getElementById(`res${key}Unit`);
+      const elSecUnit = document.getElementById(`res${key}SecUnit`);
+      const elBadge = document.getElementById(`badgeStatus${key}`);
+      const elErrAbs = document.getElementById(`errAbs${key}`);
+      const elErrRel = document.getElementById(`errRel${key}`);
+
+      if(!isValid || val === null) {
+        elVal.innerText = "N/A";
+        elUnit.innerText = "No aplicable para n actual";
+        elSecUnit.innerText = "---";
+        elBadge.className = "px-2 py-0.5 text-[10px] rounded-md font-mono bg-red-500/20 text-red-400 border border-red-500/30";
+        elBadge.innerText = "Incompatible";
+        elErrAbs.innerText = "---";
+        elErrRel.innerText = "---";
+        return;
+      }
+
+      elBadge.className = "px-2 py-0.5 text-[10px] rounded-md font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+      elBadge.innerText = "Válido";
+
+      // Formatting with exponential if value is extremely large (e.g., Satellite Ejercicio 25)
+      if(Math.abs(val) >= 1e7) {
+        elVal.innerText = val.toExponential(6);
+      } else {
+        elVal.innerText = val.toFixed(6);
+      }
+
+      elUnit.innerText = ex.primaryUnit;
+
+      if(ex.secUnitName) {
+        const secVal = val * ex.secUnitFactor;
+        elSecUnit.innerText = `= ${secVal >= 1e7 ? secVal.toExponential(6) : secVal.toFixed(6)} ${ex.secUnitName}`;
+      } else {
+        elSecUnit.innerText = "---";
+      }
+
+      // Errors
+      const refVal = ex.refExact !== null ? ex.refExact : (ex.refSimpson !== null ? ex.refSimpson : ex.refTrapezoid);
+      if(refVal !== null && refVal !== 0) {
+        const errAbs = Math.abs(val - refVal);
+        const errRel = (errAbs / Math.abs(refVal)) * 100;
+        elErrAbs.innerText = errAbs >= 1e7 ? errAbs.toExponential(6) : errAbs.toFixed(6);
+        elErrRel.innerText = `${errRel.toFixed(4)}%`;
+      } else {
+        elErrAbs.innerText = "---";
+        elErrRel.innerText = "---";
+      }
+    }
+
+    /* WEIGHTS TABLE GENERATOR */
+    function populateWeightsTable(n, h, yValues) {
+      const tbody = document.getElementById('weightsTableBody');
+      const tfoot = document.getElementById('weightsTableFooter');
+      tbody.innerHTML = '';
+
+      let sumWT = 0, sumContrT = 0;
+      let sumWS13 = 0, sumContrS13 = 0;
+      let sumWS38 = 0, sumContrS38 = 0;
+
+      const isEven = (n % 2 === 0);
+      const isMult3 = (n % 3 === 0);
+
+      for(let i = 0; i <= n; i++) {
+        const x_i = currentX[i];
+        const y_i = yValues[i];
+
+        // Trapecio weight
+        const wT = (i === 0 || i === n) ? h / 2 : h;
+        const contrT = wT * y_i;
+        sumWT += wT;
+        sumContrT += contrT;
+
+        // Simpson 1/3 weight
+        let wS13 = 0;
+        if(isEven) {
+          if(i === 0 || i === n) wS13 = h / 3;
+          else wS13 = (i % 2 !== 0) ? (4 * h / 3) : (2 * h / 3);
+        }
+        const contrS13 = wS13 * y_i;
+        sumWS13 += wS13;
+        sumContrS13 += contrS13;
+
+        // Simpson 3/8 weight
+        let wS38 = 0;
+        if(isMult3) {
+          if(i === 0 || i === n) wS38 = 3 * h / 8;
+          else wS38 = (i % 3 === 0) ? (6 * h / 8) : (9 * h / 8);
+        }
+        const contrS38 = wS38 * y_i;
+        sumWS38 += wS38;
+        sumContrS38 += contrS38;
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-800/40 border-b border-slate-800/40 text-slate-300";
+        tr.innerHTML = `
+          <td class="p-2.5 text-center font-bold text-slate-400">${i}</td>
+          <td class="p-2.5 text-brand-300">${x_i.toFixed(4)}</td>
+          <td class="p-2.5 text-slate-200">${y_i >= 1e6 ? y_i.toExponential(4) : y_i.toFixed(6)}</td>
+          <td class="p-2.5 text-emerald-400">${wT.toFixed(6)}</td>
+          <td class="p-2.5 text-emerald-300">${contrT >= 1e6 ? contrT.toExponential(4) : contrT.toFixed(6)}</td>
+          <td class="p-2.5 text-blue-400">${isEven ? wS13.toFixed(6) : '-'}</td>
+          <td class="p-2.5 text-blue-300">${isEven ? (contrS13 >= 1e6 ? contrS13.toExponential(4) : contrS13.toFixed(6)) : '-'}</td>
+          <td class="p-2.5 text-purple-400">${isMult3 ? wS38.toFixed(6) : '-'}</td>
+          <td class="p-2.5 text-purple-300">${isMult3 ? (contrS38 >= 1e6 ? contrS38.toExponential(4) : contrS38.toFixed(6)) : '-'}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+
+      tfoot.innerHTML = `
+        <tr class="bg-slate-950">
+          <td class="p-2.5 text-center uppercase tracking-wider">TOTAL SUM</td>
+          <td class="p-2.5">---</td>
+          <td class="p-2.5">---</td>
+          <td class="p-2.5 text-emerald-400">${sumWT.toFixed(6)}</td>
+          <td class="p-2.5 text-emerald-300">${sumContrT >= 1e6 ? sumContrT.toExponential(6) : sumContrT.toFixed(6)}</td>
+          <td class="p-2.5 text-blue-400">${isEven ? sumWS13.toFixed(6) : '-'}</td>
+          <td class="p-2.5 text-blue-300">${isEven ? (sumContrS13 >= 1e6 ? sumContrS13.toExponential(6) : sumContrS13.toFixed(6)) : '-'}</td>
+          <td class="p-2.5 text-purple-400">${isMult3 ? sumWS38.toFixed(6) : '-'}</td>
+          <td class="p-2.5 text-purple-300">${isMult3 ? (sumContrS38 >= 1e6 ? sumContrS38.toExponential(6) : sumContrS38.toFixed(6)) : '-'}</td>
+        </tr>
+      `;
+    }
+
+    /* COMPARISON DOCENTE MATRIX TABLE POPULATOR */
+    function populateComparisonMatrixTable(rTrap, rS13, rS38, rSComb, ex) {
+      const tbody = document.getElementById('matrixComparisonBody');
+      tbody.innerHTML = '';
+
+      const methods = [
+        { name: 'Trapecio Compuesto', val: rTrap, ref: ex.refTrapezoid, status: 'Ejecutado OK' },
+        { name: 'Simpson 1/3 Compuesto', val: rS13, ref: ex.refSimpson, status: rS13 !== null ? 'Ejecutado OK' : 'No Aplicable (n Impar)' },
+        { name: 'Simpson 3/8 Compuesto', val: rS38, ref: ex.refSimpson, status: rS38 !== null ? 'Ejecutado OK' : 'No Aplicable (n ≠ 3k)' },
+        { name: 'Simpson Combinado (Híbrido)', val: rSComb, ref: ex.refSimpson, status: 'Recomendado Docente' }
+      ];
+
+      methods.forEach(m => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-800/50 transition";
+
+        let valStr = "N/A";
+        let secValStr = "---";
+        let errAbsStr = "---";
+        let errRelStr = "---";
+
+        if(m.val !== null) {
+          valStr = m.val >= 1e7 ? m.val.toExponential(6) : m.val.toFixed(6);
+          if(ex.secUnitName) {
+            const sv = m.val * ex.secUnitFactor;
+            secValStr = `${sv >= 1e7 ? sv.toExponential(6) : sv.toFixed(6)} ${ex.secUnitName}`;
+          }
+
+          if(m.ref !== null) {
+            const ea = Math.abs(m.val - m.ref);
+            const er = (ea / Math.abs(m.ref)) * 100;
+            errAbsStr = ea >= 1e7 ? ea.toExponential(6) : ea.toFixed(6);
+            errRelStr = `${er.toFixed(4)}%`;
+          }
+        }
+
+        const refStr = m.ref !== null ? (m.ref >= 1e7 ? m.ref.toExponential(6) : m.ref.toFixed(6)) : 'N/A';
+
+        tr.innerHTML = `
+          <td class="p-3 font-semibold text-slate-200">${m.name}</td>
+          <td class="p-3 text-brand-300 font-bold">${valStr}</td>
+          <td class="p-3 text-slate-400">${ex.primaryUnit}</td>
+          <td class="p-3 text-accent-300">${secValStr}</td>
+          <td class="p-3 text-amber-300">${refStr}</td>
+          <td class="p-3 text-slate-300">${errAbsStr}</td>
+          <td class="p-3 ${errRelStr.includes('0.0000') ? 'text-emerald-400 font-bold' : 'text-amber-400'}">${errRelStr}</td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] ${m.val !== null ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-500'}">${m.status}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    /* INTERACTIVE SVG GRAPHICS RENDERER */
+    function renderDynamicChart() {
+      const svg = document.getElementById('svgChart');
+      const container = document.getElementById('chartContainer');
+      const showTrapezoids = document.getElementById('chkShowTrapezoids').checked;
+      const showArea = document.getElementById('chkShowArea').checked;
+
+      const width = container.clientWidth || 800;
+      const height = container.clientHeight || 320;
+
+      svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      svg.innerHTML = '';
+
+      if(currentX.length < 2) return;
+
+      const margin = { top: 25, right: 25, bottom: 40, left: 55 };
+      const plotWidth = width - margin.left - margin.right;
+      const plotHeight = height - margin.top - margin.bottom;
+
+      // Domain & Range Bounds
+      const minX = Math.min(...currentX);
+      const maxX = Math.max(...currentX);
+      let minY = Math.min(0, Math.min(...currentY));
+      let maxY = Math.max(...currentY);
+      if(maxY === minY) maxY = minY + 1;
+      const padY = (maxY - minY) * 0.15;
+      maxY += padY;
+
+      // Coordinate Mappings
+      const mapX = x => margin.left + ((x - minX) / (maxX - minX || 1)) * plotWidth;
+      const mapY = y => margin.top + plotHeight - ((y - minY) / (maxY - minY || 1)) * plotHeight;
+
+      // 1. Draw Grid Lines
+      const gridGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      gridGroup.setAttribute('stroke', '#1e293b');
+      gridGroup.setAttribute('stroke-width', '1');
+
+      for(let i = 0; i <= 5; i++) {
+        const gy = minY + (i / 5) * (maxY - minY);
+        const py = mapY(gy);
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', margin.left);
+        line.setAttribute('x2', width - margin.right);
+        line.setAttribute('y1', py);
+        line.setAttribute('y2', py);
+        gridGroup.appendChild(line);
+
+        // Y-Axis Ticks Label
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', margin.left - 8);
+        text.setAttribute('y', py + 4);
+        text.setAttribute('fill', '#64748b');
+        text.setAttribute('font-size', '10');
+        text.setAttribute('text-anchor', 'end');
+        text.setAttribute('font-family', 'monospace');
+        text.textContent = gy >= 1e5 ? gy.toExponential(2) : gy.toFixed(2);
+        svg.appendChild(text);
+      }
+      svg.appendChild(gridGroup);
+
+      // 2. Filled Area Under Curve
+      if(showArea) {
+        const areaPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        let d = `M ${mapX(currentX[0])} ${mapY(0)}`;
+        for(let i = 0; i < currentX.length; i++) {
+          d += ` L ${mapX(currentX[i])} ${mapY(currentY[i])}`;
+        }
+        d += ` L ${mapX(currentX[currentX.length - 1])} ${mapY(0)} Z`;
+        areaPath.setAttribute('d', d);
+        areaPath.setAttribute('fill', 'rgba(59, 130, 246, 0.15)');
+        svg.appendChild(areaPath);
+      }
+
+      // 3. Trapezoidal / Subinterval Dividers
+      if(showTrapezoids) {
+        const trapGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        trapGroup.setAttribute('stroke', 'rgba(34, 197, 94, 0.4)');
+        trapGroup.setAttribute('stroke-width', '1');
+        trapGroup.setAttribute('stroke-dasharray', '3,3');
+
+        for(let i = 0; i < currentX.length; i++) {
+          const px = mapX(currentX[i]);
+          const py = mapY(currentY[i]);
+          const p0 = mapY(0);
+
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', px);
+          line.setAttribute('x2', px);
+          line.setAttribute('y1', p0);
+          line.setAttribute('y2', py);
+          trapGroup.appendChild(line);
+        }
+        svg.appendChild(trapGroup);
+      }
+
+      // 4. Interpolated Curve / Connecting Polygon Line
+      const curvePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      let dCurve = `M ${mapX(currentX[0])} ${mapY(currentY[0])}`;
+      for(let i = 1; i < currentX.length; i++) {
+        dCurve += ` L ${mapX(currentX[i])} ${mapY(currentY[i])}`;
+      }
+      curvePath.setAttribute('d', dCurve);
+      curvePath.setAttribute('fill', 'none');
+      curvePath.setAttribute('stroke', '#3b82f6');
+      curvePath.setAttribute('stroke-width', '2.5');
+      svg.appendChild(curvePath);
+
+      // 5. Data Node Points & Tooltips
+      const tooltip = document.getElementById('chartTooltip');
+
+      for(let i = 0; i < currentX.length; i++) {
+        const cx = mapX(currentX[i]);
+        const cy = mapY(currentY[i]);
+
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', cx);
+        circle.setAttribute('cy', cy);
+        circle.setAttribute('r', '4.5');
+        circle.setAttribute('fill', '#22c55e');
+        circle.setAttribute('stroke', '#0f172a');
+        circle.setAttribute('stroke-width', '2');
+        circle.setAttribute('class', 'cursor-pointer hover:scale-150 transition-transform');
+
+        // Hover events
+        circle.onmouseover = function(e) {
+          tooltip.classList.remove('hidden');
+          tooltip.innerHTML = `
+            <div class="font-bold text-brand-300">Nodo ${i}</div>
+            <div>x = ${currentX[i]}</div>
+            <div>f(x) = ${currentY[i]}</div>
+          `;
+          tooltip.style.left = `${cx + 10}px`;
+          tooltip.style.top = `${cy - 30}px`;
+        };
+
+        circle.onmouseout = function() {
+          tooltip.classList.add('hidden');
+        };
+
+        svg.appendChild(circle);
+
+        // X-Axis Labels
+        const textX = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        textX.setAttribute('x', cx);
+        textX.setAttribute('y', height - margin.bottom + 16);
+        textX.setAttribute('fill', '#94a3b8');
+        textX.setAttribute('font-size', '10');
+        textX.setAttribute('text-anchor', 'middle');
+        textX.setAttribute('font-family', 'monospace');
+        textX.textContent = currentX[i];
+        svg.appendChild(textX);
+      }
+    }
+
+    /* MODAL DISPLAY TOGGLE */
+    function toggleTheoryModal() {
+      const modal = document.getElementById('theoryModal');
+      modal.classList.toggle('hidden');
+    }
+
+    function resetCurrentExercise() {
+      loadExercise(currentExId);
+    }
+  </script>
 </body>
 </html>
